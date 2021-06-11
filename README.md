@@ -107,8 +107,11 @@ As above, but the operand is decremented before use.
 # Example
 
   DAT -1
+
   ADD #5, -1	; add 5 to the number stored at the previous address.
+  
   MOV #0, @-2	; move the number 0 to the address pointed to at address [-2].
+  
   JMP -2		; jump back to the ADD
 
 The DAT statement serves to hold a value that will be used by the program
