@@ -63,15 +63,15 @@ CORE is initialized to DAT 0, 0.
     (8)  JMN A B   ; Jump to location B if A != 0.
     
     (9)  JMZ A B   ; Jump to location B if A == 0.
+
+    (10) DJN A B   ; Jump to location B if --A != 0.
+
+    (11) DJZ A B   ; Jump to location B if --A == 0.
         
-    (10) SKE A B   ; Skip next instruction if A == B.
+    (12) SKE A B   ; Skip next instruction if A == B.
     
-    (11) SLT A B   ; Skip next instruction if A < B.
+    (13) SLT A B   ; Skip next instruction if A < B.
     
-    (12)           ; reserved
-
-    (13)           ; reserved
-
     (14)           ; reserved
 
     (15) SPL A     ; Add A to the process queue.

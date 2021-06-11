@@ -109,17 +109,27 @@ int executeCorewar()
             break;
 
 //
-//      JMP is JMN A #1  or  JMZ A #0
+//      JMP is JMN #1 B  or  JMZ #0 B
 //
 
-        case JMN: // IP = A if B != 0
-            if (bCell->B > 0) 
-                ip = aCell->A;
+        case DJN: // IP = B if --A != 0
+            aCell->A = aCell->A - 1;
+            setLocation(aLocation, aCell);
+            // fall through...
+
+        case JMN: // IP = B if A != 0
+            if (aCell->A > 0) 
+                ip = bCell->B;
             break;
 
-        case JMZ: // IP = A if B == 0
-            if (bCell->B == 0) 
-                ip = aCell->A;
+        case DJZ: // IP = B if --A == 0
+            aCell->A = aCell->A - 1;
+            setLocation(aLocation, aCell);
+            // fall through...
+
+        case JMZ: // IP = B if A == 0
+            if (aCell->A == 0) 
+                ip = bCell->B;
             break;
 
         case SKE: // IP++ if A == B

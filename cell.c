@@ -18,10 +18,10 @@ char* opcodes[16] = {
     "...",
 	"jmn", // jmp != 0
 	"jmz", // jmp == 0
+    "djn",
+    "djz",
 	"ske", // skip if == 
 	"slt", // skip if <
-    "...",
-    "...",
     "...",
 	"spl"  // split 
 };
