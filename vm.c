@@ -8,6 +8,16 @@ int ip;
 void setIp(int val) { ip = val; }
 int getIp() { return ip; }
 
+void execFail(char *reason)
+{
+    if (isVerbose())
+    {
+        textcolor(LTRED);
+        cprintf("                                     rm: %s\r\n", reason);
+        textcolor(DEFAULT_COLOR);
+    }
+}
+
 int executeCorewar()
 {
     int aLocation, bLocation;
@@ -18,8 +28,6 @@ int executeCorewar()
     int bMod = 0;
 
     Cell* cell = getLocation(ip);
-//    cprintf("%d:", ip);
-//    printCell("", cell, "\r\n");
 
     // Figure out the A location and cell.
     switch(cell->aMode)
@@ -50,6 +58,7 @@ int executeCorewar()
     {
        default:
        case 0: 
+            if (isVerbose()) execFail("#b not permitted");
            return -1; // die
 
        case 3: // address indirect predecrement
@@ -73,6 +82,7 @@ int executeCorewar()
     switch(cell->opcode)
     {
         case HCF:
+            if (isVerbose()) execFail("hcf");
             return -1; // die
 
         case MOV: 

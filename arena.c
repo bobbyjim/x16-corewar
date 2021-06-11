@@ -78,11 +78,14 @@ void dumpArena(int start, int end)
       end = x;
    }  
 
-   cprintf("arena -----------------------------\r\n", start, end);
-   for(x=start; x<=end; ++x)
+   cprintf("arena %5d:  ", start);
+   cell = getLocation(start);
+   printCell(cell, "\r\n");
+
+   for(x=start+1; x<=end; ++x)
    {
       cell = getLocation(x);
-      cprintf("     %5d:  ", x);
+      cprintf("      %5d:  ", x);
       printCell(cell, "\r\n");
    }
 }

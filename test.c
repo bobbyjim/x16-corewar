@@ -2,24 +2,15 @@
 
 #include "arena.h"
 #include "cell.h"
+#include "common.h"
 #include "test.h"
 #include "vm.h"
 
-unsigned char testVerbosity = 0;
 unsigned char lastTestResult;
 
 unsigned char getLastTestResult()
 {
     return lastTestResult;
-}
-
-void setTestVerbosity(unsigned char v) 
-{
-    testVerbosity = v;
-    if (v > 0)
-        cprintf("verbose test mode!\r\n\r\n");
-    else
-        cprintf("(quiet mode)\r\n\r\n");
 }
 
 //
@@ -57,11 +48,10 @@ unsigned char testCell(char *testname, int resultLocation)
         lastTestResult += TEST_FAIL_B_OPERAND;
     }
 
-    if (testVerbosity)
+    if (isVerbose())
     { 
-        cprintf("-----------------------------------\r\n");
         textcolor(LTBLUE);
-        cprintf("want %5d:  ", resultLocation);
+        cprintf("want  %5d:  ", resultLocation);
         printCell(expected, "  ");
         cprintf("%s  ", testname);
         if (lastTestResult) 
@@ -75,6 +65,7 @@ unsigned char testCell(char *testname, int resultLocation)
            cputs("ok\r\n");
         }
         textcolor(DEFAULT_COLOR);
+        cprintf("-----------------------------------\r\n");
     }
 
     return lastTestResult;

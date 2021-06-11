@@ -1,4 +1,4 @@
-SOURCES = main.c   arena.c cell.c test.c vm.c
+SOURCES = main.c   arena.c cell.c common.c test.c vm.c
 
 PROGRAM = COREWAR
 

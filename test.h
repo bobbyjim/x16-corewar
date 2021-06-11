@@ -13,7 +13,7 @@
 #define RUN_TEST(testname,startLocation, startString,resultLocation,resultString)  loadCell(startString, startLocation); \
     dumpArena(startLocation,resultLocation); \
     setIp(startLocation); \
-    if (executeCorewar()) cputs("exec fail\r\n"); \
+    executeCorewar(); \
     buildTempCell(resultString); \
     dumpArena(startLocation,resultLocation); \
     testCell(testname, resultLocation); 
