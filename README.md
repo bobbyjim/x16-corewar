@@ -1,7 +1,8 @@
 # x16-corewar - a Corewar VM
 
-ref: https://corewar.co.uk/standards/cwg.txt - 1984
-ref: https://corewar.co.uk/madtutor.txt - 1986 and 1988
+ ref: https://corewar.co.uk/standards/cwg.txt - 1984
+
+ ref: https://corewar.co.uk/madtutor.txt - 1986 and 1988
 
 # THE MEMORY CELL
 
@@ -39,32 +40,42 @@ CORE is initialized to DAT 0, 0.
 
 # OPCODES
 
-    DAT   B   ; Remove process from the process queue.
+    (0)  DAT   B   ; Remove process from the process queue.
 
-    MOV A B   ; Move A into location B.
+    (1)  MOV A B   ; Move A into location B.
     
-    ADD A B   ; B += A
-        
-    SUB A B   ; B -= A
-    
-    MUL A B   ; B *= A
-    
-    DIV A B   ; B /= A
-    
-    MOD A B   ; B %= A
-    
-    JMN A B   ; Jump to location B if A != 0.
-    
-    JMZ A B   ; Jump to location B if A == 0.
-        
-    SKE A B   ; Skip next instruction if A == B.
-    
-    SNE A B   ; Skip next instruction if A != B.
-    
-    SPL A     ; Add A to the process queue.
-    
-    NOP       ; No operation
+    (2)  ADD A B   ; B += A
 
+         SUB A B   ; B -= A  ( implemented as "ADD inverse(A) B" )
+        
+    (3)  MUL A B   ; B *= A
+    
+    (4)  DIV A B   ; B /= A
+    
+    (5)  MOD A B   ; B %= A
+
+         JMP   B   ; Jump to location B ( implemented as "JMZ #0 B" ).
+    
+    (6)            ; reserved
+
+    (7)            ; reserved
+
+    (8)  JMN A B   ; Jump to location B if A != 0.
+    
+    (9)  JMZ A B   ; Jump to location B if A == 0.
+        
+    (10) SKE A B   ; Skip next instruction if A == B.
+    
+    (11) SNE A B   ; Skip next instruction if A != B.
+    
+    (12)           ; reserved
+
+    (13)           ; reserved
+
+    (14)           ; reserved
+
+    (15) SPL A     ; Add A to the process queue.
+    
 ## Modes
 
 Addressing modes are identified by sigils:

@@ -11,16 +11,16 @@ char* opcodes[16] = {
 	"hcf", // halt, catch fire
 	"mov",
 	"add",
-    "sub",
 	"mul",
 	"div",
 	"mod", 
-    "...",
 	"...", 
+    "...",
 	"jmn", // jmp != 0
 	"jmz", // jmp == 0
 	"ske", // skip if == 
 	"skn", // skip if !=
+    "...",
     "...",
     "...",
 	"spl"  // split 
@@ -108,6 +108,25 @@ void parseCell(char *input, int position)
 
     decodeOperand(a, &amode, &aval);
     decodeOperand(b, &bmode, &bval);
+
+    //
+    // SUB isn't a true opcode; it's a negative ADD.
+    //
+    if EQ(opcode, "SUB") 
+    {
+        strcpy(opcode, "ADD");   // switch to ADD
+        aval = CORESIZE - aval;  // invert the value
+    }
+
+    //
+    // JMP isn't a true opcode; it's a JMZ #0 B.
+    //
+    if EQ(opcode, "JMP")
+    {
+        strcpy(opcode, "JMZ");
+        amode = 0; // #
+        aval = 0;  // 0
+    }
 
     cell.opcode  = encode(opcode);
     cell.aMode  = amode;
