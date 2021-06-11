@@ -3,16 +3,31 @@
 ref: https://corewar.co.uk/standards/cwg.txt - 1984
 ref: https://corewar.co.uk/madtutor.txt - 1986 and 1988
 
+# THE MEMORY CELL
+
+The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
+
+    opcode:     4 bits
+    a-mode:     2 bits
+    b-mode:     2 bits
+    a operand: 12 bits
+    b operand: 12 bits
+
+The operand size (signed 12 bits) limits the max core size to 4096 cells. 
+I set the value at 4056 cells, and each cell is 4 bytes, so core memory is 16,224 bytes.
+
 # ARCHITECTURE
 
-The ARENA is the memory area; it represents a chunk of contiguous bytes.
-This memory area is circular (i.e. it wraps around), so that 
-there is no absolute position available to programs running there.
-Because of this, all code is written using relative addressing.
+The ARENA or CORE is the memory area; it represents a chunk of contiguous memory cells.
+This memory area is circular (i.e. it wraps around), so that there is no absolute position 
+available to programs running there.  Because of this, all code is written using relative 
+addressing.
 
-Address+0 is the current instruction.
-Address-1 was the previous instruction.
-Address+1 is the next instruction.
+ Address+0 is the current instruction.
+
+ Address-1 was the previous instruction.
+
+ Address+1 is the next instruction.
 
 Each instruction occupies a single location in the ARENA.
 There are no registers available for programs; all
@@ -21,39 +36,32 @@ memory manipulations are in the ARENA.
 All address arithmetic is done modulo the size of the ARENA.
 
 CORE is initialized to DAT 0, 0.  
-Any number of warriors may be loaded into core.
 
 # OPCODES
 
-    DAT   B   ; Initialize location to value B.  A is #0.
+    DAT   B   ; Remove process from the process queue.
 
     MOV A B   ; Move A into location B.
     
-    ADD A B   ; location(B).content + A -> location(B)
+    ADD A B   ; B += A
+        
+    SUB A B   ; B -= A
     
-    SUB A B   ; location(B).content - A -> location(B)
+    MUL A B   ; B *= A
     
-    MUL A B   ; location(B).content x A -> location(B)
+    DIV A B   ; B /= A
     
-    DIV A B   ; location(B).content / A -> location(B)
-    
-    MOD A B   ; location(B).content ^ A -> location(B)
-    
-    JMP   B   ; Jump to location B.
+    MOD A B   ; B %= A
     
     JMN A B   ; Jump to location B if A != 0.
     
     JMZ A B   ; Jump to location B if A == 0.
-    
-    DJN A B   ; Jump to location B if --content(A) != 0.
-    
-    DJZ A B   ; Jump to location B if --content(A) == 0.
-    
+        
     SKE A B   ; Skip next instruction if A == B.
     
     SNE A B   ; Skip next instruction if A != B.
     
-    SPL   B   ; Fork to address B.
+    SPL A     ; Add A to the process queue.
     
     NOP       ; No operation
 
@@ -65,7 +73,7 @@ Addressing modes are identified by sigils:
 
 The number following this symbol is the operand.
 
-### Relative
+### Relative (no sigil)
 
 The  number  specifies  an  offset from the current instruction. Mars
 adds the  offset to the address of the current  instruction; the num-
@@ -82,7 +90,7 @@ address. The number found  at this second location is the operand.
 
 ### Predecrement Indirect "<"
 
-As above, but the pointer is decremented before use.
+As above, but the operand is decremented before use.
 
 
 # Example
