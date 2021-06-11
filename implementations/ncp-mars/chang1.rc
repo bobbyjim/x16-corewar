@@ -1,0 +1,13 @@
+; chang 1 corewars program
+	mov	#0	-1
+	jmp	-1 ;;nothing
+	dat		+9	;complete tester
+start:	spl	-2
+	spl	4
+	add	#-16	-3	; nothing
+	mov	#5	@-4
+help:	jmp	-4
+	spl	2
+	jmp	-1
+finish: next: odd:	mov	0	1
+finito:

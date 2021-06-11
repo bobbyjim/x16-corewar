@@ -1,0 +1,13 @@
+This is the pixrect version of the corewars interpreter.
+This is system specific.  It does not depend on SUNVIEW, X, or any other
+windowing system.  You will need the pixrect library to run this.
+Do NOT overlap other windows on the window generated, and to remove this
+window, just do a redraw.  (Yes, it does a write to the frame buffer.
+Pretty ugly, but.....)
+
+As usual, bug reports, etc, send to me, and any questions pertaining to
+interface2.c direct to Case Larsen (laba-3ar@wolf.berkeley.edu).
+
+Na Choon Piaw
+c60a-3ci@wolf.berkeley.edu
+(to be changed)

@@ -1,0 +1,42 @@
+all: assem disassem interp
+
+ASM_OBJ = amain.o tokenize.o parse.o lookup.o aoutput.o assem.o
+
+# Standard curses version of interpreter
+INT_OBJ = main.o load.o output.o play.o inst.o
+LIBS = -lcurses -ltermcap
+
+# Sun version using pixrect lib of interpreter
+SINT_OBJ = main.o load.o output.o play.o inst.o interface2.o
+SLIBS = -lcurses -ltermcap -lpixrect
+
+# Define one of DEBUG, SMALL, SUN or BIG (BIG is buggy)
+CFLAGS = -O -DSUN
+
+assem: $(ASM_OBJ)
+	cc -o assem $(ASM_OBJ)
+
+disassem: disassem.c assem.h
+	cc -O disassem.c -o disassem
+
+# Standard version
+#interp: $(INT_OBJ)
+#	cc -o interp  $(INT_OBJ) $(LIBS)
+
+# Sun pixrect version
+interp: $(SINT_OBJ)
+	cc -o interp  $(SINT_OBJ) $(SLIBS)
+
+amain.o: amain.c assem.h
+tokenize.o: tokenize.c assem.h
+parse.o: parse.c assem.h
+lookup.o: lookup.c assem.h
+output.o: aoutput.c assem.h
+assem.o: assem.c assem.h
+
+main.o:	main.c interp.h
+load.o: load.c interp.h
+output.o: output.c interp.h
+play.o: play.c interp.h
+inst.o: inst.c interp.h
+interface2.o: interface2.c interp.h

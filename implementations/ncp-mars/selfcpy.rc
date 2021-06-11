@@ -1,0 +1,12 @@
+imps:	mov	#0	-1
+	jmp	imps
+start:	spl	imps
+	jmp	loop
+count:	dat	#7
+ptr:	dat	#57
+	mov	#7	count
+	mov	#57	ptr
+loop:	mov	@count	@ptr
+	sub	#1	ptr
+	djn	loop	count
+	jmp	46

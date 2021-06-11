@@ -1,0 +1,217 @@
+/*	Copyrighted (C) 1989 by Na Choon Piaw.  All rights reserved       */
+
+
+
+/*	This program and documentation is Public Domain, and may be	  */
+/*	distributed and copied by everyone provided this header		  */
+/*	remains intact							  */
+
+This is a new version of corewars I'm working on.  It will feature
+ONLY 2 player games (I hate 3 or more players on corewars), some limited
+amounts of display (using curses) though that will be implemented only
+after the non-display functions work.  And an independent, full featured
+assembler.  The interpreter will load "binary" code only.
+
+Full featured -- 1 physical pass, 2 "in memory" passes.
+		 symbolic memory addresses, immediate, direct, and indirect
+		 addressing modes.
+
+COREWARS is a where the players each write an assembly language program
+that battle each other in the memory of a computer called MARS.  (Memory
+Array Redcode Simulator)  The game ends when (1) all the streams of execution
+on one side have died out, or (2) when the time limit is up.  In (1) the
+winner is the side which still has surviving execution streams.  In (2)
+the game is a draw.  Once we are finished with implementing this game,
+maybe we can schedule a corewars tournament.
+
+My version of corewars implements (hopefully in a short while) the following
+instructions from World 7 --- The First Corewars Tournament (with some
+modifications) (Note: the first two articles have slightly differing
+definitions):
+
+INSTRUCTION	MNEUMONIC	CODE	ARGUMENTS	EXPLANATION
+Move		mov		1	A B		move contents of
+							address A to address B
+Add		add		2	A B		add contents of address
+							A to address B
+Subtract	sub		3	A B		subtract contents of
+							address A from address
+							B
+Jump		jmp		4	  B		Transfer control
+							to address A
+Jump if zero	jmz		5	A B		Transfer control
+							to address A if
+							contents of B are
+							greater then 0
+Jump if not 0	jmn		6	A B		transfer control to
+							address B if contents
+							of B is != 0
+Decrement jump	djn		7	A B		Subtract 1 from
+if not zero						contents of address
+							B and transfer
+							control to
+							address A if contents
+							of address B is != 0
+Compare		cmp		8	A B		compare contents of
+							addresses A and B; if
+							they are unequal,
+							skip the next
+							instruction.
+Split		spl		9	  B		split execution into
+							next instruction and
+							the instruction at A
+Data statment	dat		0	  B		A nonexecuatble
+							statement; B is the
+							data value.
+
+
+Addressing modes:-
+immediate mode:		#argument
+direct mode:		symbol
+indirect mode:		@symbol
+
+Expected other differences -
+1)	When +/- are conducted to an address that contains other than a
+	data instruction, parameter B is always modified (even in spl
+	instructions).  There is no way and add or sub instruction can
+	change one type of instruction to another, so the CODE part of
+	the table is really rather worthless.
+2)	The assembler will feature the "real" symbol.  In other words,
+	you do not have to convert all your symbols into numbers before
+	feeding your program to the assembler.
+	There will be a reserved symbol, though, called "start" and this
+	will be where your code will start executing.
+	All symbols are characterized by a ':' character at the end, e.g.
+	"start:"
+3)	Separate assembly.  In the interest of modularity and ease of
+	debugging (for my code, of course, not for the redcode assembly
+	program, so I still don't suggest writing 200 instruction redcode
+	programs, even though the assembler permits it), I have decided
+	to separate the assembler from the interpreter.  The interpreter
+	will have to be fed the preassembled programs, etc. in a special
+	format.  (produced by the assembler).
+
+4)	Will not implement stuff like the "<" or the ">".  i.e., decrease
+	stuff pointed to by operand, then get that address.
+
+5)	Randomized starting memory for the redcode programs.
+	Make corewars more deterministic - predictable.
+	Can be implemented later if demand arises.
+
+Other expected differences -
+
+BUGS!!!
+
+BUG REPORT SECTION:-
+
+assem/main.c	- The program will not accept files with ".e" anywhere
+		  in the last portion of it (i.e., the extension)
+		  These files will be rejected.
+		  e.g.	"mice.eecs" will be rejected
+
+tokenize.c	- The program will not be able to handle comments without
+		  any delimiters between them and the code.
+		  e.g.  "mov 0 1;;help" will be tokenized into:
+			"mov" "0" "1;;help" which is not acceptable, since
+			the later functions like lookup will not be able
+			to handle it.
+
+play.c/main.c:	- The BIG option (to fully bit map the memory array,
+		  doesn't work.   I wonder why?)
+
+Note:
+A.K. Dewdney's THE ARMCHAIR UNIVERSE is available from Freeman (publisher).
+I highly recommend buying a copy and reading it.  It's a whole lot
+of fun and teaches a lot of great programming techniques.
+It's moderately priced at around $13.25, and, in my opinion, worth every
+penny.
+
+Choon Piaw
+
+
+Assembler portion of corewars
+Usage:
+assem <file1> <file2> .....
+
+All output files will have an additional extension ".e"
+for instance, if the input file was "help.rc" the ouput file will be "help.e"
+
+Assembler limits: 200 instructions
+		  100 symbols
+		  255 characters in a string
+
+Comments are indicated by a ;
+Assembler is not case sensitive.
+Remember that this does not conform to ALL the A.K. Dewdney standards
+in the implementation of OPCODES/PARAMETERS, but as long as you write
+code that does not depend on changing other's opcode, you should be
+all right.  The instruction set is standard, however.
+
+BUGS:
+	Any file starting with a .e extension is rejected automatically
+	Any character is recognized as a symbol.  Therefore, in
+	mov	0	1;this is a comment
+	1;this will be interpreted as a symbol instead of a number with
+	a comment following it.  The proper form would be:
+	mov	0	1	;this is a comment
+
+
+
+Corewars interpreter
+- started 12/14/88 by Na Choon Piaw (The Existentialist)
+
+usage:
+
+interp cycles file1 file2
+
+cycles		-number of machine cycles
+file1, file2	-preassembled corewars programs
+
+Programmer's documentation for Redcode interpreter
+
+Goal:
+
+To provide a visual version of corewars that is fast, standard and portable.
+
+Modules
+
+1.	int loader(int position)
+	-	load up files into main memory to position.
+	-	setup the starting pcs
+
+2.	eval
+	-	input the memory element + a host of other info
+		(including the list of streams)
+	-	each of the instructions will be handled by a separate
+		subroutine that will be passed just sufficient info to carry
+		it out.
+
+3.	control
+	-	responsible for keeping track of who's what and passing the
+		correct instruction to the evaluator
+
+4.	Display
+	-	Display in a visual format (to be decided) what's going on
+		in memory at that time.
+
+Data Structures
+
+Streams of execution are kept as circularly linked list, with split
+instructions adding to the linked list, and with trying to execute data
+instructions.
+
+All parameters will range from 0 to +8000.  Excess will be trimmed off,
+negatives will be wrapped back around.
+
+Credit where credit is due:
+
+Case Larsen wrote and debugged the SUN graphics function interface2.c
+Adrain Ho wrote and debugged the loader load.c
+I wrote and debugged the rest.
+
+
+Na Choon Piaw
+c60a-3ci@wolf.berkeley.edu
+(soon to be changed)
+301P, 2650 Durant,
+Berkeley, CA 94720.

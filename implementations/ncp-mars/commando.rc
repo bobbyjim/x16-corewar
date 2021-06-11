@@ -1,0 +1,17 @@
+;;; an implementation of a k dewdney's commando program
+
+count:	dat	#14
+ptr:	dat	#200
+imps:	mov	#0	-1	; imp stomper
+	jmp	imps
+	mov	#14	count
+	mov	#100	ptr
+start:	mov	imp	1000
+	spl	999
+loop:	mov	@count	@ptr
+	sub	#1	ptr
+	djn	loop	count
+	add	#4	ptr
+	spl	@ptr
+	jmp	imps
+imp:	mov	0	1

@@ -1,0 +1,4 @@
+start: spl after
+	mov	#0	-3
+	jmp -1
+after: mov 0 1

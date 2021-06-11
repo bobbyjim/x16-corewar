@@ -1,0 +1,11 @@
+dat 0
+dat 1
+dat 2 
+dat 3
+dat -1		/indirect pointer back one
+dat 1		/indirect pointer ahead 1
+dat 0
+mov -6 -7	/mov 1 to 0
+mov #77 -6	/put 77 on top of 2
+mov @-5 @-4	/mov the 3 to the nearest 0
+dat 0		/illegal; terminates test

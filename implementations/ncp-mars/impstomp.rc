@@ -1,0 +1,2 @@
+start:	mov	#0	-1
+	jmp start

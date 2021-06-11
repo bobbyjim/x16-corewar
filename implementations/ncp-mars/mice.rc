@@ -1,0 +1,12 @@
+; mouse program --- The First Core War tournament
+
+ptr:	dat	#0		;hell
+start:	mov	#9	ptr	;you
+loop:	mov	@ptr	@7	;know
+	sub	#1	6
+	djn	loop	ptr	;i hate testing
+	add	#1	4
+	spl	@3		;assemblers
+	add	#653	2	;like
+	jmz	-7	-8	;this
+	dat	833

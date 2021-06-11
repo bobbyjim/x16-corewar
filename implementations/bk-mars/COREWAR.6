@@ -1,0 +1,43 @@
+.TH COREWAR 6 
+.UC 4
+.SH NAME
+corewar \- battling programs
+.SH SYNOPSIS
+.B corewar
+[
+.B \-l
+] [
+.B \-t
+] [
+.B \-d
+]
+prog1 prog2
+.br
+.SH DESCRIPTION
+.I Corewar
+loads 
+.I file1
+and
+.I file2
+into the simulated memory arena and executes instructions for 
+each in turn until one encounters an illegal instruction, at which
+point the other is declared the winner.
+If neither has won in two minutes, the match is declared a draw.
+.PP
+.I Corewar is
+based on A.K Dewdeney's May 1984 column in Scientific American.
+.PP
+The
+.B \-l
+option causes a listing of the generated code to be written on the
+standard output while each file is loaded.
+.PP
+The option
+.B \-t
+causes an instruction execution trace to be written on the standard output.
+.PP
+The option
+.B \-d
+causes a post mortem memory dump to be writenm on the standard output.
+.SH AUTHOR
+Berry Kercheval (ihnp4!zehntel!berry)

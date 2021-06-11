@@ -1,0 +1,10 @@
+dat	#0
+dat	#99
+start:	mov	@-2	@-1
+cmp	-3	#9
+jmp	4
+add	#1	-5
+add	#1	-5
+jmp	-5
+mov	#99	93
+jmp	93

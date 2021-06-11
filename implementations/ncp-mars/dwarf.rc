@@ -1,0 +1,4 @@
+ dat	-1
+start: add	#5	-1
+mov	#0	@-2
+JMP	-2

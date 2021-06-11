@@ -1,0 +1,35 @@
+;;; dwarfgun program.
+;;; Choon Piaw
+stomp:	mov	#0	-1
+	jmp	stomp
+start:	spl	init
+	jmp	stomp
+count:  dat	#4
+ptr:	dat	#500
+
+;;;; dwarf part
+
+dwf:	dat	#5000
+loop:	mov	#0	@dwf
+	djn	loop	dwf
+;;; initialization
+init:	mov	#-200	ptr2
+	mov	#0	count2
+	mov	#500	ptr
+	mov	#4	count
+;;; dwarf copy part
+dwfcp:	mov	@count	@ptr
+	sub	#1	ptr
+	djn	dwfcp	count
+	add	#3	ptr
+	spl	@ptr		; leave dwarf running.
+;;;; copy self upstream
+selfcp:	mov	@count2	@ptr2
+	sub	#1	count2
+	sub	#1	ptr2
+	cmp	count2	#-27
+	jmp	selfcp
+	add	#3	ptr2
+	jmp	@ptr2
+ptr2:	dat	#-200
+count2:	dat	#0

@@ -1,0 +1,5 @@
+start:
+mov	#0	@ptr
+add	#1	ptr
+jmp	start
+ptr:	dat	#1
