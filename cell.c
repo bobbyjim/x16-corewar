@@ -11,12 +11,12 @@ char* opcodes[16] = {
 	"hcf", // halt, catch fire
 	"mov",
 	"add",
+    "sub",
 	"mul",
 	"div",
 	"mod", 
     "...",
-    "...",
-	"jmp", 
+	"...", 
 	"jmn", // jmp != 0
 	"jmz", // jmp == 0
 	"ske", // skip if == 
@@ -45,7 +45,7 @@ char modes[] = {
         '<'     // address indirect predecrement
 };
 
-void printCell(char* prefix, Cell *cell, char* postfix)
+void printCell(Cell *cell, char* postfix)
 {
     cprintf("%s %c%d, %c%d", 
         opcodes[cell->opcode], 
@@ -59,8 +59,9 @@ void printCell(char* prefix, Cell *cell, char* postfix)
        cputs(postfix);
 }
 
-void decodeOperand(char *src, unsigned char *mode, int *val)
+void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
 {
+   int rawValue;
    switch(*src)
    {
        case '#': 
@@ -82,7 +83,13 @@ void decodeOperand(char *src, unsigned char *mode, int *val)
             *mode = 1;
             break;
    }
-   sscanf(src, "%d", val); // allows negative sign
+   sscanf(src, "%d", &rawValue); // allows negative sign
+
+   // convert raw value to core location
+   while (rawValue < 0) rawValue += CORESIZE; // inefficient
+   rawValue %= CORESIZE;
+   
+   *val = rawValue; 
 }
 
 void parseCell(char *input, int position)
@@ -94,8 +101,8 @@ void parseCell(char *input, int position)
     char a[8]; 
     unsigned char bmode;
     char b[8];
-    int aval;
-    int bval;
+    unsigned int aval;
+    unsigned int bval;
 
     sscanf(input, "%s %s %s", opcode, a, b);
 

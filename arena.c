@@ -72,10 +72,10 @@ void dumpArena(int start, int length)
    Cell *cell;
    int x = 0;
 
-   for(x=0; x<10; ++x)
+   for(x=0; x<length; ++x)
    {
       cell = getLocation(start+x);
       cprintf("%d: ", start + x);
-      printCell("", cell, "\r\n");
+      printCell(cell, "\r\n");
    }
 }

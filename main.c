@@ -20,7 +20,7 @@ void main() //int argc, char* argv[])
     clrscr();
 
     parseCell("mov 0 1", 1000);
-    dumpArena(1000, 5);
+    dumpArena(1000,5);
 
     setIp(1000);
     drawArena();
@@ -31,7 +31,6 @@ void main() //int argc, char* argv[])
        drawCell(getIp());
     }
     cprintf("\r\n\r\n");
-//    dumpArena(1000, 5);
 }
 
     /*
