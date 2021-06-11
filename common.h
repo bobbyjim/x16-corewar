@@ -9,6 +9,8 @@ typedef unsigned int  word;
 #define     CYAN    4
 #define     GREEN   5
 #define     BLUE    6
+#define     YELLOW  7
+#define     AMBER   8
 
 #define     EQ(a,b)         (!strcmp(a,b))
 
