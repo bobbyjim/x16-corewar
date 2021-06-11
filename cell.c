@@ -26,6 +26,10 @@ char* opcodes[16] = {
 	"spl"  // split 
 };
 
+Cell tempCell;
+
+Cell* getTempCell() { return &tempCell; }
+
 unsigned char encode(char *opcode)
 {
     unsigned char x = 16;
@@ -47,7 +51,7 @@ char modes[] = {
 
 void printCell(Cell *cell, char* postfix)
 {
-    cprintf("%s %c%d, %c%d", 
+    cprintf("%s    %c%-5u  %c%-5u", 
         opcodes[cell->opcode], 
         modes[cell->aMode],
         cell->A,
@@ -92,10 +96,15 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
    *val = rawValue; 
 }
 
-void parseCell(char *input, int position)
+unsigned char loadCell(char *input, int position)
 {
-    Cell cell;
+    buildTempCell(input);
+    setLocation(position, &tempCell);
+    return 0;
+}
 
+void buildTempCell(char *input)
+{
     char opcode[3];
     unsigned char amode;
     char a[8]; 
@@ -125,25 +134,12 @@ void parseCell(char *input, int position)
     {
         strcpy(opcode, "JMZ");
         amode = 0; // #
-        aval = 0;  // 0
+        aval  = 0; // 0
     }
 
-    cell.opcode  = encode(opcode);
-    cell.aMode  = amode;
-    cell.A      = aval;
-    cell.bMode  = bmode;
-    cell.B      = bval;
-
-    setLocation(position, &cell);
-
-    //printCell(cell, " <-- parsed\r\n");
-/*
-    cprintf("input(%s)  --->  %d %u %u %u %u\r\n",
-        input,
-        cell->opcode,
-        cell->aMode,
-        cell->A,
-        cell->bMode,
-        cell->B
-    );*/
+    tempCell.opcode  = encode(opcode);
+    tempCell.aMode  = amode;
+    tempCell.A      = aval;
+    tempCell.bMode  = bmode;
+    tempCell.B      = bval;
 }

@@ -11,8 +11,11 @@ int getIp() { return ip; }
 int executeCorewar()
 {
     int aLocation, bLocation;
-    Cell *aCell, *bCell;
+     Cell *aCell, *bCell;
+ 
     int indirect = 0;
+    int aMod = 0;
+    int bMod = 0;
 
     Cell* cell = getLocation(ip);
 //    cprintf("%d:", ip);
@@ -27,18 +30,11 @@ int executeCorewar()
            break;
 
         case 3: // address indirect predecrement
-           //
-           //  I think this is not the ICWS predecrement.
-           //  This version seems to remove the need for
-           //  DJN and DJZ, and in fact makes the "D" 
-           //  possible for all opcodes.  Sounds like a win.
-           //
-           cell->A = cell->A - 1;
-           setLocation(ip, cell); // store it
+           aMod = -1;
            // fall through
 
         case 2: // address indirect
-           aCell = getLocation(ip + cell->A);
+           aCell = getLocation(ip + cell->A + aMod);
            indirect = aCell->A;
            // fall through
 
@@ -57,13 +53,11 @@ int executeCorewar()
            return -1; // die
 
        case 3: // address indirect predecrement
-           // see comment for aMode case.
-           cell->B = cell->B-1;
-           setLocation(ip, cell); // store it
+           bMod = -1;
            // fall through
 
         case 2: // address indirect
-           bCell = getLocation(ip + cell->B);
+           bCell = getLocation(ip + cell->B + bMod);
            indirect = bCell->B;
            // fall through
 

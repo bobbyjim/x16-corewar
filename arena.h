@@ -11,7 +11,7 @@ void setLocation(int x, Cell *copy);
 void clearArena();
 void drawArena();
 void drawCell(int location);
-void dumpArena(int start, int length);
+void dumpArena(int start, int end);
 
 #endif
 

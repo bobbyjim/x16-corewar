@@ -5,44 +5,23 @@
 #include "common.h"
 #include "arena.h"
 #include "cell.h"
+#include "test.h"
 #include "vm.h"
 
 void main() //int argc, char* argv[])
 {
-    int status;
-    int x;
-
     cbm_k_bsout(0x8E); // revert to primary case
 
     clearArena();
     bgcolor(BLACK);
-    textcolor(GREEN);
+    textcolor(LTGREY);
     clrscr();
 
-    parseCell("mov 0 1", 1000);
-    dumpArena(1000,5);
+    setTestVerbosity(1);
 
-    setIp(1000);
-    drawArena();
-    for(x=0; x<CORESIZE; ++x)
-    {
-       drawCell(getIp());
-       status = executeCorewar();
-       drawCell(getIp());
-    }
-    cprintf("\r\n\r\n");
+    //RUN_TEST("hcf 0/0",  1000, "hcf #4 #5",  1000, "hcf #4 #5");
+    RUN_TEST("mov #a b", 200, "mov #4   1",  201, "hcf #0  #4"); // OK
+    //RUN_TEST(1000, "mov #0  @1",  1001, "mov #0  @1"); 
+    //RUN_TEST(1004, "mov 0  2",  1004, "mov 0  2");
+
 }
-
-    /*
-    parseCell("hcl 20 30", 1000);
-    parseCell("mov 20 30", 1001);
-    parseCell("add 20 30", 1002);
-    parseCell("mul 20 30", 1004);
-    parseCell("div 20 30", 1005);
-    parseCell("mod 20 30", 1006);
-    parseCell("jmn 20 30", 1008);
-    parseCell("jmz 20 30", 1009);
-    parseCell("ske 20 30", 1012);
-    parseCell("skn 20 30", 1013);
-    parseCell("spl 20 30", 1014);
-    */

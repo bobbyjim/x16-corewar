@@ -67,15 +67,22 @@ void drawCell(int pos)
    cputcxy(col,row,cellChar[OPCODE(pos)]);
 }
 
-void dumpArena(int start, int length)
+void dumpArena(int start, int end)
 {
    Cell *cell;
-   int x = 0;
+   int x = start;
 
-   for(x=0; x<length; ++x)
+   if (end < start) // swap
    {
-      cell = getLocation(start+x);
-      cprintf("%d: ", start + x);
+      start = end;
+      end = x;
+   }  
+
+   cprintf("arena -----------------------------\r\n", start, end);
+   for(x=start; x<=end; ++x)
+   {
+      cell = getLocation(x);
+      cprintf("     %5d:  ", x);
       printCell(cell, "\r\n");
    }
 }

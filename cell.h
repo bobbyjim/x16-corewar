@@ -27,6 +27,8 @@ typedef struct {
 #define			SPL				15
 
 void printCell(Cell *cell, char *postfix);
-void parseCell(char *input, int location);
+unsigned char loadCell(char *input, int location);
+void buildTempCell(char *input);
+Cell* getTempCell();
 
 #endif 
