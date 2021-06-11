@@ -19,7 +19,7 @@ char* opcodes[16] = {
 	"jmn", // jmp != 0
 	"jmz", // jmp == 0
 	"ske", // skip if == 
-	"skn", // skip if !=
+	"slt", // skip if <
     "...",
     "...",
     "...",

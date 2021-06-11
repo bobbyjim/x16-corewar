@@ -66,7 +66,7 @@ CORE is initialized to DAT 0, 0.
         
     (10) SKE A B   ; Skip next instruction if A == B.
     
-    (11) SNE A B   ; Skip next instruction if A != B.
+    (11) SLT A B   ; Skip next instruction if A < B.
     
     (12)           ; reserved
 

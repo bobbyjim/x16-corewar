@@ -20,7 +20,7 @@ typedef struct {
 #define			JMN				8
 #define			JMZ				9
 #define			SKE				10
-#define			SNE				11
+#define			SLT				11
 // 12
 // 13
 // 14

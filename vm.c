@@ -127,8 +127,8 @@ int executeCorewar()
                 ++ip;
             break;
 
-        case SNE: // IP++ if A != B
-            if (bCell->B != aCell->A) 
+        case SLT: // IP++ if A <!=> B
+            if (bCell->B < aCell->A) 
                 ++ip;
             break;
 
