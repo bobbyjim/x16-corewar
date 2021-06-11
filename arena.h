@@ -6,8 +6,11 @@
 
 #define  CORESIZE    4056
 
+void initCore();
+
 Cell* getLocation(int x);
 void setLocation(int x, Cell *copy);
+void clearLocation(int position);
 void clearArena();
 void drawArena();
 void drawCell(int location);

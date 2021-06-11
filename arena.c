@@ -28,6 +28,23 @@ char cellChar[16] = {
    172      // nop
 };
 
+void clearLocation(int position)
+{
+    Cell *tgt = &arena[ position % CORESIZE ];
+   tgt->opcode = 0;
+   tgt->aMode  = 0;
+   tgt->A      = 0;
+   tgt->bMode  = 0;
+   tgt->B      = 0;
+}
+
+void initCore()
+{
+   int pos;
+   for(pos=0; pos<CORESIZE; ++pos)
+      clearLocation(pos);
+}
+
 Cell* getLocation(int position)
 {
    return &arena[ position % CORESIZE];
@@ -45,7 +62,9 @@ void setLocation(int position, Cell *copy)
 
 void clearArena()
 {
-   cputs("Arena cleared.\r\n");
+   textcolor(LTGREY);
+   cputs("** arena reset **\r\n");
+   textcolor(DEFAULT_COLOR);
 }
 
 void drawArena()
@@ -78,7 +97,9 @@ void dumpArena(int start, int end)
       end = x;
    }  
 
-   cprintf("arena %5d:  ", start);
+   if (isVerbose() < 2) return;
+
+   cprintf("\r\narena %5d:  ", start);
    cell = getLocation(start);
    printCell(cell, "\r\n");
 

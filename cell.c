@@ -11,18 +11,18 @@ char* opcodes[16] = {
 	"hcf", // halt, catch fire
 	"mov",
 	"add",
+    "sub",
 	"mul",
 	"div",
-	"mod", 
-	"...", 
-    "...",
+	"mod",  
+    "???",
 	"jmn", // jmp != 0
 	"jmz", // jmp == 0
     "djn",
     "djz",
 	"ske", // skip if == 
 	"slt", // skip if <
-    "...",
+    "???",
 	"spl"  // split 
 };
 
@@ -119,20 +119,11 @@ void buildTempCell(char *input)
     decodeOperand(b, &bmode, &bval);
 
     //
-    // SUB isn't a true opcode; it's a negative ADD.
-    //
-    if EQ(opcode, "SUB") 
-    {
-        strcpy(opcode, "ADD");   // switch to ADD
-        aval = CORESIZE - aval;  // invert the value
-    }
-
-    //
     // JMP isn't a true opcode; it's a JMZ #0 B.
     //
-    if EQ(opcode, "JMP")
+    if EQ(opcode, "jmp")
     {
-        strcpy(opcode, "JMZ");
+        strcpy(opcode, "jmz");
         amode = 0; // #
         aval  = 0; // 0
     }

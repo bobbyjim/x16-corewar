@@ -12,10 +12,10 @@ typedef struct {
 #define			HCF				0
 #define			MOV				1
 #define			ADD				2
-#define			MUL				3
-#define			DIV				4
-#define			MOD  			5
-// 6
+#define			SUB				3
+#define			MUL				4
+#define			DIV				5
+#define			MOD  			6
 // 7
 #define			JMN				8
 #define			JMZ				9

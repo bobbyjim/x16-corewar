@@ -19,9 +19,9 @@ unsigned char getLastTestResult()
 unsigned char testCell(char *testname, int resultLocation)
 {
     Cell* expected = getTempCell();
-    unsigned char lastTestResult = TEST_PASS;
- 
     Cell *actual = getLocation(resultLocation);
+
+    lastTestResult = TEST_PASS;
 
     if (actual->opcode != expected->opcode)
     {
@@ -51,7 +51,7 @@ unsigned char testCell(char *testname, int resultLocation)
     if (isVerbose())
     { 
         textcolor(LTBLUE);
-        cprintf("want  %5d:  ", resultLocation);
+        cprintf("test  %5d:  ", resultLocation);
         printCell(expected, "  ");
         cprintf("%s  ", testname);
         if (lastTestResult) 

@@ -13,5 +13,5 @@ void setVerbosity(unsigned char v)
 
 unsigned char isVerbose()
 {
-    return verbosity > 0;
+    return verbosity;
 }

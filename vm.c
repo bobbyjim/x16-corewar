@@ -18,16 +18,37 @@ void execFail(char *reason)
     }
 }
 
+int aLocation, bLocation;
+Cell *aCell, *bCell;
+int indirect;
+int aMod;
+int bMod;
+int temp;
+Cell* cell;
+int aValue, bValue;
+
+void debug()
+{
+    cprintf("*** debug ***");
+    cprintf("%5d ", aLocation);
+    printCell(aCell, "   ");
+    cprintf("%5d ", bLocation);
+    printCell(bCell, "\r\n");
+}
+
 int executeCorewar()
 {
-    int aLocation, bLocation;
-     Cell *aCell, *bCell;
- 
-    int indirect = 0;
-    int aMod = 0;
-    int bMod = 0;
-
-    Cell* cell = getLocation(ip);
+    cell = getLocation(ip);
+    aCell = cell;
+    bCell = cell;
+    aLocation = ip;
+    bLocation = ip;
+    indirect = 0;
+    aMod = 0;
+    bMod = 0;
+    temp = 0;
+    aValue = 0;
+    bValue = 0;
 
     // Figure out the A location and cell.
     switch(cell->aMode)
@@ -51,7 +72,7 @@ int executeCorewar()
            aCell = getLocation(aLocation);
            break;
     }
-    // aLocation and aCell are set.
+    aValue = aCell->A;
  
     // Figure out the B-location and B-cell
     switch(cell->bMode)
@@ -75,7 +96,7 @@ int executeCorewar()
             bCell = getLocation(bLocation);
             break;
     }
-    // bLocation and bCell are set.
+    bValue = bCell->B;
 
     ++ip; // increment the instruction index in preparation for program X's next turn.
 
@@ -86,29 +107,50 @@ int executeCorewar()
             return -1; // die
 
         case MOV: 
-            if (bCell == aCell) // nop
-               break; 
-
-            setLocation(bLocation, aCell);
+            switch(cell->aMode)
+            {
+                case 0: // mov A value to B operand 
+                    bCell->B = aCell->A;
+                    setLocation(bLocation, bCell);
+                    break;
+            
+                default: // copy A cell to B location
+                    setLocation(bLocation, aCell);
+                    break;
+            }
             break;
 
-        case ADD:
-            bCell->B += aCell->A;
+        case SUB: // subtract A value from B operand
+            aValue = -aValue;
+            // fall through
+
+        case ADD: // add A value to B operand
+            // 
+            // Per the 1986 rules, this operator 
+            // updates the B value only.
+            //
+            temp = aValue + bValue;
+            if (temp < 0)        temp += CORESIZE;
+            if (temp > CORESIZE) temp -= CORESIZE;
+            bCell->B = temp;
             setLocation(bLocation, bCell);
             break;
 
         case MUL: 
-            bCell->B *= aCell->A;
+            bValue *= aValue;
+            bCell->B = bValue % CORESIZE;
             setLocation(bLocation, bCell);
             break;
 
         case DIV:
-            bCell->B /= aCell->A;
+            bValue /= aValue;
+            bCell->B = bValue % CORESIZE;
             setLocation(bLocation, bCell);
             break;
 
         case MOD:
-            bCell->B %= aCell->A;
+            bValue %= aValue;
+            bCell->B = bValue % CORESIZE;
             setLocation(bLocation, bCell);
             break;
 
@@ -117,7 +159,9 @@ int executeCorewar()
 //
 
         case DJN: // IP = B if --A != 0
-            aCell->A = aCell->A - 1;
+            temp = aCell->A - 1;
+            if (temp < 0)        temp += CORESIZE;
+            aCell->A = temp;
             setLocation(aLocation, aCell);
             // fall through...
 
@@ -127,7 +171,9 @@ int executeCorewar()
             break;
 
         case DJZ: // IP = B if --A == 0
-            aCell->A = aCell->A - 1;
+            temp = aCell->A - 1;
+            if (temp < 0)        temp += CORESIZE;
+            aCell->A = temp;
             setLocation(aLocation, aCell);
             // fall through...
 
