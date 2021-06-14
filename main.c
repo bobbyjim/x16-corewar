@@ -47,12 +47,39 @@ int readLine()
    return 1;
 }
 
+void help()
+{
+    textcolor(LTBLUE);
+    cputs("cls: clear screen                       logout: quit program                   \r\n");
+    cputs("reset: reset arena                      verbose: change output level           \r\n");
+    cputs("run a: run code at address a            d a b: display arena from a to b       \r\n");
+    cputs("opcodes: display opcode help            help: show this text\r\n");
+    textcolor(DEFAULT_COLOR);
+}
+
+void opcodeHelp()
+{
+    textcolor(LTBLUE);
+    cputs("hcf a b: halt-catch-fire                mov a b                                \r\n");
+    cputs("add a b: b += a                         sub a b: b -= a                        \r\n");
+    cputs("mul a b: b *= a                         div a b: b /= a                        \r\n");
+    cputs("mod a b: b %= a                                                                \r\n");
+    cputs("jmn a b: jmp if a!=0                    jmz a b: jmp if a==0                   \r\n");
+    cputs("djn a b: jmp if --a!=0                  djz a b: jmp if --a==0                 \r\n");
+    cputs("ske a b: ++ip if a==b                   slt a b: ++ip if a<b                   \r\n");
+    cputs("xch a b: exchange a,b at a              spl a b: split to b                    \r\n");
+    textcolor(DEFAULT_COLOR);
+}
+
 void repl()
 {
    int address = 1000; // whatever
    int toAddress;
 
-   cprintf("coreshell 1.0\r\n");
+   cputs("coreshell 1.0\r\n");
+   textcolor(LTBLUE);
+   cputs("cls     logout     reset     verbose      run %d      d %d %d       help\r\n");
+   textcolor(DEFAULT_COLOR);
    setVerbosity(2);
 
    for(;;)
@@ -68,6 +95,14 @@ void repl()
       {
           clrscr();
           gotoxy(0,0);
+      }
+      else if (!strcmp(lineInputBuffer,"help"))
+      {
+          help();
+      }
+      else if (!strcmp(lineInputBuffer,"opcodes"))
+      {
+          opcodeHelp();
       }
       else if (!strcmp(lineInputBuffer,"verbose")) 
       {
