@@ -21,6 +21,7 @@ typedef unsigned int  word;
 #define     EQ(a,b)         (!strcmp(a,b))
 
 void setVerbosity(unsigned char v);
+void bumpVerbosity();
 unsigned char isVerbose();
 
 #endif

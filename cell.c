@@ -8,22 +8,22 @@
 #include "common.h"
 
 char* opcodes[16] = {
-	"hcf", // halt, catch fire
-	"mov",
-	"add",
-    "sub",
-	"mul",
-	"div",
-	"mod",  
-    "???",
-	"jmn", // jmp != 0
-	"jmz", // jmp == 0
-    "djn",
-    "djz",
-	"ske", // skip if == 
-	"slt", // skip if <
-    "???",
-	"spl"  // split 
+	/*  0 */ "hcf", 
+	/*  1 */ "mov",                            
+	/*  2 */ "add",
+    /*  3 */ "sub",
+	/*  4 */ "mul",
+	/*  5 */ "div",
+	/*  6 */ "mod",  
+    /*  7 */ "???",
+	/*  9 */ "jmz", 
+	/*  8 */ "jmn", 
+    /* 10 */ "djn",
+    /* 11 */ "djz",
+	/* 12 */ "ske", 
+	/* 13 */ "slt", 
+    /* 14 */ "xch",
+	/* 15 */ "spl"  
 };
 
 Cell tempCell;
@@ -43,10 +43,10 @@ unsigned char encode(char *opcode)
 }
 
 char modes[] = { 
-        '#',    // value
-        ' ',    // address 
-        '@',    // address indirect 
-        '<'     // address indirect predecrement
+        '#',    // value (0)
+        ' ',    // address (1)
+        '@',    // address indirect (2)
+        '<'     // address indirect predecrement (3)
 };
 
 void printCell(Cell *cell, char* postfix)
@@ -69,22 +69,22 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
    switch(*src)
    {
        case '#': 
-            *mode = 0;
+            *mode = IMMEDIATE;
             ++src;
             break;
 
        case '@': 
-            *mode = 2;
+            *mode = INDIRECT;
             ++src;
             break;
 
        case '<': 
-            *mode = 3;
+            *mode = PREDECREMENT_INDIRECT;
             ++src;
             break;
 
        default:  
-            *mode = 1;
+            *mode = DIRECT;
             break;
    }
    sscanf(src, "%d", &rawValue); // allows negative sign
@@ -103,7 +103,7 @@ unsigned char loadCell(char *input, int position)
     return 0;
 }
 
-void buildTempCell(char *input)
+unsigned char buildTempCell(char *input)
 {
     char opcode[3];
     unsigned char amode;
@@ -112,7 +112,7 @@ void buildTempCell(char *input)
     char b[8];
     unsigned int aval;
     unsigned int bval;
-
+    
     sscanf(input, "%s %s %s", opcode, a, b);
 
     decodeOperand(a, &amode, &aval);
@@ -133,4 +133,5 @@ void buildTempCell(char *input)
     tempCell.A      = aval;
     tempCell.bMode  = bmode;
     tempCell.B      = bval;
+    return 1;
 }

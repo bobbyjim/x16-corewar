@@ -7,10 +7,49 @@
 #include "vm.h"
 
 unsigned char lastTestResult;
+unsigned char totalTests  = 0;
+unsigned char testsPassed = 0;
 
 unsigned char getLastTestResult()
 {
     return lastTestResult;
+}
+
+//
+//  Compares the ip with the expected result IP
+//
+void testIp(char *testname, int location, int resultIp)
+{
+    Cell* expected = getTempCell();
+
+    lastTestResult = TEST_PASS;
+
+    if ( resultIp != getIp() )
+    {
+        lastTestResult = TEST_FAIL_IP;
+    }
+
+    if (isVerbose())
+    { 
+        textcolor(LTBLUE);
+        cprintf("test  %5d:  ", location);
+        printCell(expected, "  ");
+        cprintf("%s  ", testname);
+        ++totalTests;
+        if (lastTestResult) 
+        {
+            textcolor(LTRED);
+            cputs("** fail **\r\n");
+        }
+        else
+        {
+           textcolor(GREEN);
+           cputs("ok\r\n");
+           ++testsPassed;
+        }
+        textcolor(DEFAULT_COLOR);
+        cprintf("-----------------------------------\r\n");
+    }    
 }
 
 //
@@ -54,6 +93,7 @@ unsigned char testCell(char *testname, int resultLocation)
         cprintf("test  %5d:  ", resultLocation);
         printCell(expected, "  ");
         cprintf("%s  ", testname);
+        ++totalTests;
         if (lastTestResult) 
         {
             textcolor(LTRED);
@@ -63,6 +103,7 @@ unsigned char testCell(char *testname, int resultLocation)
         {
            textcolor(GREEN);
            cputs("ok\r\n");
+           ++testsPassed;
         }
         textcolor(DEFAULT_COLOR);
         cprintf("-----------------------------------\r\n");

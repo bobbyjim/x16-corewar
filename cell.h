@@ -23,12 +23,18 @@ typedef struct {
 #define			DJZ				11
 #define			SKE				12
 #define			SLT				13
-// 14
+#define			XCH				14
 #define			SPL				15
+
+
+#define			IMMEDIATE					0
+#define			DIRECT						1
+#define			INDIRECT					2
+#define			PREDECREMENT_INDIRECT		3
 
 void printCell(Cell *cell, char *postfix);
 unsigned char loadCell(char *input, int location);
-void buildTempCell(char *input);
+unsigned char buildTempCell(char *input);
 Cell* getTempCell();
 
 #endif 

@@ -3,6 +3,6 @@
 
 void setIp(int val);
 int getIp();
-int executeCorewar();
+int execute();
 
 #endif

@@ -4,6 +4,7 @@
 #include "cell.h"
 #include "arena.h"
 
+
 int ip;
 void setIp(int val) { ip = val; }
 int getIp() { return ip; }
@@ -18,183 +19,224 @@ void execFail(char *reason)
     }
 }
 
-int aLocation, bLocation;
-Cell *aCell, *bCell;
-int indirect;
-int aMod;
-int bMod;
-int temp;
-Cell* cell;
-int aValue, bValue;
+extern Cell arena[CORESIZE];
+
+Cell            inst;
+Cell            operandData;
+int             ip, source, destination, final;
+unsigned char   owner;
+int             tempInt;
 
 void debug()
 {
     cprintf("*** debug ***");
-    cprintf("%5d ", aLocation);
-    printCell(aCell, "   ");
-    cprintf("%5d ", bLocation);
-    printCell(bCell, "\r\n");
+    cprintf("%5d -> %5d  ", source, destination);
+    printCell(&operandData, "\r\n");
 }
 
-int executeCorewar()
+void addProcess(unsigned char owner, unsigned int address)
 {
-    cell = getLocation(ip);
-    aCell = cell;
-    bCell = cell;
-    aLocation = ip;
-    bLocation = ip;
-    indirect = 0;
-    aMod = 0;
-    bMod = 0;
-    temp = 0;
-    aValue = 0;
-    bValue = 0;
+    cprintf("add-process(%u @ @u)\r\n", owner, address);
+}
 
-    // Figure out the A location and cell.
-    switch(cell->aMode)
+void removeProcess(unsigned char owner, unsigned int address)
+{
+    cprintf("remove-process(%u @ @u)\r\n", owner, address);
+}
+
+unsigned char getOperandAData()
+{
+    switch(inst.aMode)
     {
-        case 0: // direct
-           aLocation = ip;
-           aCell = cell;
-           break;
-
-        case 3: // address indirect predecrement
-           aMod = -1;
-           // fall through
-
-        case 2: // address indirect
-           aCell = getLocation(ip + cell->A + aMod);
-           indirect = aCell->A;
-           // fall through
-
-        case 1: // address
-           aLocation = ip + cell->A + indirect;
-           aCell = getLocation(aLocation);
-           break;
-    }
-    aValue = aCell->A;
- 
-    // Figure out the B-location and B-cell
-    switch(cell->bMode)
-    {
-       default:
-       case 0: 
-            if (isVerbose()) execFail("#b not permitted");
-           return -1; // die
-
-       case 3: // address indirect predecrement
-           bMod = -1;
-           // fall through
-
-        case 2: // address indirect
-           bCell = getLocation(ip + cell->B + bMod);
-           indirect = bCell->B;
-           // fall through
-
-        case 1: // address
-            bLocation = ip + cell->B + indirect;
-            bCell = getLocation(bLocation);
+        case IMMEDIATE: // 
+            operandData.B = inst.A;
             break;
-    }
-    bValue = bCell->B;
-
-    ++ip; // increment the instruction index in preparation for program X's next turn.
-
-    switch(cell->opcode)
-    {
-        case HCF:
-            if (isVerbose()) execFail("hcf");
-            return -1; // die
-
-        case MOV: 
-            switch(cell->aMode)
-            {
-                case 0: // mov A value to B operand 
-                    bCell->B = aCell->A;
-                    setLocation(bLocation, bCell);
-                    break;
-            
-                default: // copy A cell to B location
-                    setLocation(bLocation, aCell);
-                    break;
-            }
+        case DIRECT: // 
+            operandData = arena[(ip + inst.A) % CORESIZE];
             break;
-
-        case SUB: // subtract A value from B operand
-            aValue = -aValue;
+        case PREDECREMENT_INDIRECT: 
+            --arena[(ip + inst.A) % CORESIZE].B;
             // fall through
+        case INDIRECT: // 
+            source = arena[(ip + inst.A) % CORESIZE].B;
+            operandData = arena[(source + ip + inst.A) % CORESIZE];
+            break;
+    }
+    return 0;
+}
 
-        case ADD: // add A value to B operand
-            // 
-            // Per the 1986 rules, this operator 
-            // updates the B value only.
-            //
-            temp = aValue + bValue;
-            if (temp < 0)        temp += CORESIZE;
-            if (temp > CORESIZE) temp -= CORESIZE;
-            bCell->B = temp;
-            setLocation(bLocation, bCell);
+unsigned char getOperandBData()
+{
+    switch(inst.bMode)
+    {
+        case IMMEDIATE: 
+            //cprintf("illegal immediate destination\r\n");
+            //return 1;
+            /* 
+                Officially an error, but here, Immediate B-modes are allowed 
+                and have the same effect as in 86.
+            */
+            final = ip;
             break;
 
-        case MUL: 
-            bValue *= aValue;
-            bCell->B = bValue % CORESIZE;
-            setLocation(bLocation, bCell);
+        case DIRECT: 
+            final = ip + inst.B + CORESIZE;
             break;
 
-        case DIV:
-            bValue /= aValue;
-            bCell->B = bValue % CORESIZE;
-            setLocation(bLocation, bCell);
+        case PREDECREMENT_INDIRECT: // pre-decrement INDIRECT
+            --arena[(ip + inst.B) % CORESIZE].B;
+            // fall through
+        case INDIRECT: 
+            destination = arena[(ip + inst.B) % CORESIZE].B;
+            final = destination + ip + inst.B + CORESIZE;
+            break;
+    }
+
+    // adjust the "final" address.
+    if (final > CORESIZE) final -= CORESIZE;
+    return 0;
+}
+
+unsigned char compareEqual()
+{
+    switch (inst.bMode)
+	{
+		case IMMEDIATE: /* error */
+			if (operandData.B == inst.B) return 1;
+			return 2;
+
+		case DIRECT:
+			if ( operandData.B == arena[(ip + inst.B) % CORESIZE].B)
+				return 1;
+			return 2;
+
+		case PREDECREMENT_INDIRECT:
+			destination = --arena[(ip + inst.B) % CORESIZE].B;
+            // fall through
+		case INDIRECT:
+			destination = arena[(ip + inst.B) % CORESIZE].B;
+			if(operandData.B == arena[(destination+ip+inst.B)%CORESIZE].B)
+				return 1;
+			return 2;
+	}	
+    return 0;
+}
+
+int execute()
+{
+    unsigned char data_bad = 0;
+    unsigned char skip = 0;
+
+    inst = arena[ip];
+    
+    operandData.opcode = 0;
+    operandData.aMode = 0;
+    operandData.bMode = 0;
+    operandData.A = 0;
+    operandData.B = 0;
+
+    if (inst.opcode >= MOV && inst.opcode <= MOD)
+    {
+        data_bad = getOperandAData() 
+                 + getOperandBData();
+        if (data_bad > 0)
+        {
+            execFail("Error retrieving operand data");
+            inst.opcode = HCF;
+        }
+    }
+
+    printCell(&inst, " <-- current cell\r\n");
+
+    switch(inst.opcode)
+    {
+        case MOV: 
+            cprintf("final address: %d\r\n", final);
+            printCell(&operandData, " <-- operand data\r\n");
+            if (inst.aMode == IMMEDIATE)
+            {
+                arena[final].B = operandData.A; /// ???
+                arena[final].bMode = IMMEDIATE;
+            }
+            else
+                arena[final] = operandData;
+            ++ip;
             break;
 
-        case MOD:
-            bValue %= aValue;
-            bCell->B = bValue % CORESIZE;
-            setLocation(bLocation, bCell);
+        case SUB: 
+            operandData.A = -operandData.A;
+            // fall thru
+        case ADD:
+            tempInt = arena[final].B + operandData.A + CORESIZE;
+            if (tempInt > CORESIZE) tempInt -= CORESIZE;
+            arena[final].B = tempInt;
+            ++ip;
             break;
 
 //
 //      JMP is JMN #1 B  or  JMZ #0 B
 //
 
-        case DJN: // IP = B if --A != 0
-            temp = aCell->A - 1;
-            if (temp < 0)        temp += CORESIZE;
-            aCell->A = temp;
-            setLocation(aLocation, aCell);
-            // fall through...
+        case DJN: // IP = A if --B != 0
+            final = (ip + inst.B) % CORESIZE;
+            if (arena[final].B == 0)
+                arena[final].B = CORESIZE - 1;
+            else
+                --arena[final].B;
 
-        case JMN: // IP = B if A != 0
-            if (aCell->A > 0) 
-                ip = bCell->B;
+            // fall through
+
+        case JMN: // IP = A if B != 0
+            final = (ip + inst.B) % CORESIZE;
+            if (/*arena[final].opcode == DAT &&*/ arena[final].B != 0)
+                ip += inst.A;
+            else   
+                ++ip;
             break;
 
         case DJZ: // IP = B if --A == 0
-            temp = aCell->A - 1;
-            if (temp < 0)        temp += CORESIZE;
-            aCell->A = temp;
-            setLocation(aLocation, aCell);
-            // fall through...
+            final = (ip + inst.B) % CORESIZE;
+            if (arena[final].B == 0)
+                arena[final].B = CORESIZE - 1;
+            else
+                --arena[final].B;
 
-        case JMZ: // IP = B if A == 0
-            if (aCell->A == 0) 
-                ip = bCell->B;
+            // fall through
+
+        case JMZ: // IP = A if B == 0
+            final = (ip + inst.B) % CORESIZE;
+            if (/*arena[final].opcode == DAT &&*/ arena[final].B == 0)
+                ip += inst.A;
+            else
+                ++ip;
             break;
 
         case SKE: // IP++ if A == B
-            if (bCell->B == aCell->A) 
-                ++ip;
-            break;
-
-        case SLT: // IP++ if A <!=> B
-            if (bCell->B < aCell->A) 
-                ++ip;
+        case SLT: // IP++ if A != B
+            getOperandAData();
+            skip = compareEqual();
+            if (skip == 2) goto fail;
+            if ((skip == 0 && inst.opcode == SLT)
+              ||(skip == 1 && inst.opcode == SKE)) ++ip; // "skip"
+            ++ip;
             break;
 
         case SPL: // SPLIT!
-            return bCell->B;
+            final = (ip + inst.A) % CORESIZE;
+            addProcess(owner, final);
+            ++ip;
             break;
+
+        case MUL: // later
+        case DIV: // later
+        case MOD: // later
+        case XCH: // later
+        case HCF:
+        fail:
+        default:
+            if (isVerbose()) execFail("hcf");
+            removeProcess(owner, ip);
+            return -1; // die
     }
 
     if (ip >= CORESIZE) 
