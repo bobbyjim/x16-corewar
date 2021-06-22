@@ -1,5 +1,3 @@
-
-#include <conio.h>
 #include "common.h"
 
 unsigned char verbosity = 0;
@@ -13,7 +11,6 @@ char* verbosityLabel[] =
 void setVerbosity(unsigned char v) 
 {
     verbosity = v;
-    cprintf("%s\r\n\r\n", verbosityLabel[v]);
 }
 
 void bumpVerbosity()

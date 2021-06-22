@@ -2,26 +2,30 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <conio.h>
+
 #include "cell.h"
 #include "arena.h"
 #include "common.h"
+#include "x16.h"
+
+
+#define     MAX_WARRIOR_LINES       256
 
 char* opcodes[16] = {
 	/*  0 */ "hcf", 
 	/*  1 */ "mov",                            
 	/*  2 */ "add",
     /*  3 */ "sub",
-	/*  4 */ "mul",
-	/*  5 */ "div",
-	/*  6 */ "mod",  
-    /*  7 */ "???",
-	/*  9 */ "jmz", 
-	/*  8 */ "jmn", 
-    /* 10 */ "djn",
-    /* 11 */ "djz",
-	/* 12 */ "ske", 
-	/* 13 */ "slt", 
+    /*  4 */ "jmp",
+	/*  5 */ "jmn", 
+	/*  6 */ "jmz", 
+    /*  7 */ "seq",
+    /*  8 */ "slt",
+	/*  9 */ "sne", 
+	/* 10 */ "flp", 
+	/* 11 */ "...", 
+	/* 12 */ "...", 
+	/* 13 */ "...", 
     /* 14 */ "xch",
 	/* 15 */ "spl"  
 };
@@ -37,9 +41,9 @@ unsigned char encode(char *opcode)
        if (!strcmp(opcode, opcodes[x])) return x;
 
 //    if EQ(opcode, "nop") return MOV;
-    if EQ(opcode, "cmp") return SKE;
+    if EQ(opcode, "cmp") return SEQ;
 
-    return 0;
+    return INVALID_OPCODE;
 }
 
 char modes[] = { 
@@ -49,20 +53,11 @@ char modes[] = {
         '<'     // address indirect predecrement (3)
 };
 
-void printCell(Cell *cell, char* postfix)
-{
-    cprintf("%s    %c%-5u  %c%-5u", 
-        opcodes[cell->opcode], 
-        modes[cell->aMode],
-        cell->A,
-        modes[cell->bMode],
-        cell->B
-        );
-
-    if (*postfix) 
-       cputs(postfix);
-}
-
+//
+//  Rather than support the hackneyed parser here, I should
+//  scrap all this and just support the "object" format.
+//  This would free up needed RAM.
+//
 void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
 {
    int rawValue;
@@ -78,10 +73,10 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
             ++src;
             break;
 
-       case '<': 
-            *mode = PREDECREMENT_INDIRECT;
-            ++src;
-            break;
+//       case '<': 
+//            *mode = PREDECREMENT_INDIRECT;
+//            ++src;
+//            break;
 
        default:  
             *mode = DIRECT;
@@ -91,47 +86,92 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
 
    // convert raw value to core location
    while (rawValue < 0) rawValue += CORESIZE; // inefficient
-   rawValue %= CORESIZE;
    
    *val = rawValue; 
 }
 
+void loadProgramFromFile(char *name, unsigned int location)
+{
+    int line;
+    int x;
+    char buffer[16];
+
+    unsigned int address = 0xa000;
+
+    x16_setbank(1);
+    x16_loadfile(name, address);
+
+    for(line=0; line<MAX_WARRIOR_LINES; ++line)
+    {
+        // build up the buffer
+        for(x=0; x<16; ++x)
+        {
+            buffer[x] = x16_getByte(address);
+            ++address;
+            if (buffer[x] == 0x0a) // done
+            {
+                buffer[x] = '\0';
+                break; // out of the buffer loop
+            }
+        }
+        if (buffer[0] == ';') // this is just a comment
+        {
+            x16_puts(buffer);
+            x16_puts("\r\n");
+        }
+        else
+        if ( (strlen(buffer) > 0) 
+          && (loadCell(buffer, location) != INVALID_OPCODE) )
+            ++location;
+    }
+}
+
 unsigned char loadCell(char *input, int position)
 {
-    buildTempCell(input);
-    setLocation(position, &tempCell);
-    return 0;
+    unsigned char value;
+    value = buildTempCell(input);
+
+    if (value != INVALID_OPCODE)
+        setLocation(position, &tempCell);
+
+    return value;
 }
 
 unsigned char buildTempCell(char *input)
 {
-    char opcode[3];
-    unsigned char amode;
-    char a[8]; 
-    unsigned char bmode;
-    char b[8];
-    unsigned int aval;
-    unsigned int bval;
+    char opcode[3] = "";
+    char a[8] = ""; 
+    char b[8] = "";
+//    char* label;
+
+    unsigned char amode = 0;
+    unsigned char bmode = 0;
+    unsigned int aval   = 0;
+    unsigned int bval   = 0;
     
-    sscanf(input, "%s %s %s", opcode, a, b);
+//    if (sscanf(input, "%s %s %s %s", label, opcode, a, b) == 4)
+//        cprintf("label found: %s\r\n", label);
+    if (sscanf(input, "%s %s %s", opcode, a, b) != 3)
+        return INVALID_OPCODE;
 
     decodeOperand(a, &amode, &aval);
     decodeOperand(b, &bmode, &bval);
-
-    //
-    // JMP isn't a true opcode; it's a JMZ #0 B.
-    //
-    if EQ(opcode, "jmp")
-    {
-        strcpy(opcode, "jmz");
-        amode = 0; // #
-        aval  = 0; // 0
-    }
 
     tempCell.opcode  = encode(opcode);
     tempCell.aMode  = amode;
     tempCell.A      = aval;
     tempCell.bMode  = bmode;
     tempCell.B      = bval;
-    return 1;
+
+    return tempCell.opcode;
+}
+
+char* getOpcodeName(Cell *cell)
+{
+    return opcodes[cell->opcode];
+}
+
+char  getMode(unsigned char mode)
+{
+    return modes[mode];
 }

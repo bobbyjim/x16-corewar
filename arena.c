@@ -1,5 +1,4 @@
-
-#include <conio.h>
+#include <stdlib.h>
 
 #include "common.h"
 #include "arena.h"
@@ -10,39 +9,56 @@
 Cell arena[CORESIZE];
 
 char cellChar[16] = {
-   46,      // hcf
+   '.',     // hcf
    95,      // mov
    '+',
    '-',
-   '*',
-   '/',
-   '%',
    94,      // jmp
    172,     // jmn
    187,     // jmz
-   188,     // djn
-   190,     // djz
-   195,     // ske
+   188,     // seq
+   190,     // slt
    195,     // sne
-   215,     // spl
-   172      // nop
+   195,     // flp
+   '?',     // 
+   '?',     // 
+   '?',     // 
+   215,     // xch
+   172      // spl
 };
 
-void clearLocation(int position)
+char arena_getCellChar(int ip)
 {
-    Cell *tgt = &arena[ position % CORESIZE ];
-   tgt->opcode = 0;
-   tgt->aMode  = 0;
-   tgt->A      = 0;
-   tgt->bMode  = 0;
-   tgt->B      = 0;
+   return cellChar[ OPCODE(ip) ];
 }
 
-void initCore()
+void clearLocation(int position, unsigned char doRandomize)
+{
+   // doRandomize:
+   //
+   // Clear with some random numbers.
+   // This gives us RND without wasting
+   // an opcode -- if we want it.
+   //
+   // NOTE.  If you want to give hints
+   // about the coresize, just use rand().
+   // Otherwise, use something like 
+   //     rand() % 256, or
+   //     65 + rand() % 26
+
+    Cell *tgt = &arena[ position % CORESIZE ];
+   tgt->opcode = HCF;
+   tgt->aMode  = 0;
+   tgt->A      = doRandomize? rand() : 0;
+   tgt->bMode  = 0;
+   tgt->B      = doRandomize? rand() : 0;
+}
+
+void arena_init(unsigned char doRandomize)
 {
    int pos;
    for(pos=0; pos<CORESIZE; ++pos)
-      clearLocation(pos);
+      clearLocation(pos, doRandomize);
 }
 
 Cell* getLocation(int position)
@@ -58,55 +74,4 @@ void setLocation(int position, Cell *copy)
    tgt->A      = copy->A;
    tgt->bMode  = copy->bMode;
    tgt->B      = copy->B;
-}
-
-void clearArena()
-{
-   textcolor(LTGREY);
-   cputs("** arena reset **\r\n");
-   textcolor(DEFAULT_COLOR);
-}
-
-void drawArena()
-{
-   int pos;
-   gotoxy(1,4);
-   for(pos=0; pos<CORESIZE; ++pos)
-   {
-      cputc(cellChar[OPCODE(pos)]);
-      if (pos % 78 == 77) cputs("\r\n ");
-   }
-}
-
-void drawCell(int pos)
-{
-   int row = 4 + pos / 78;
-   int col = 1 + pos % 78;
-
-   cputcxy(col,row,cellChar[OPCODE(pos)]);
-}
-
-void dumpArena(int start, int end)
-{
-   Cell *cell;
-   int x = start;
-
-   if (end < start) // swap
-   {
-      start = end;
-      end = x;
-   }  
-
-   if (isVerbose() < 2) return;
-
-   cprintf("\r\narena %5d:  ", start);
-   cell = getLocation(start);
-   printCell(cell, "\r\n");
-
-   for(x=start+1; x<=end; ++x)
-   {
-      cell = getLocation(x);
-      cprintf("      %5d:  ", x);
-      printCell(cell, "\r\n");
-   }
 }

@@ -15,7 +15,6 @@ The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
     b operand: 12 bits
 
 The operand size (signed 12 bits) limits the max core size to 4096 cells. 
-I set the value at 4056 cells, and each cell is 4 bytes, so core memory is 16,224 bytes.
 
 # ARCHITECTURE
 
@@ -36,43 +35,35 @@ memory manipulations are in the ARENA.
 
 All address arithmetic is done modulo the size of the ARENA.
 
-CORE is initialized to DAT 0, 0.  
+CORE is typically initialized to DAT 0, 0.  However, it might instead be initialized to DAT #nnn, #nnn, where nnn is a number from 0 to 255.
 
 # OPCODES
 
-    (0)  DAT   B   ; Remove process from the process queue.
+    (0)  HCL   B   ; Remove process from the process queue.  The mnemonic comes from the 1970s "Halt and Catch Fire" joke opcode.
 
     (1)  MOV A B   ; Move A into location B.
     
     (2)  ADD A B   ; B += A
 
-         SUB A B   ; B -= A  ( implemented as "ADD inverse(A) B" )
+    (3)  SUB A B   ; B -= A 
         
-    (3)  MUL A B   ; B *= A
+    (4)  JMP   B   ; Jump to location B.
     
-    (4)  DIV A B   ; B /= A
+    (5)  JMN A B   ; Jump to location B if A != 0.
     
-    (5)  MOD A B   ; B %= A
-
-         JMP   B   ; Jump to location B ( implemented as "JMZ #0 B" ).
-    
-    (6)            ; reserved
-
-    (7)            ; reserved
-
-    (8)  JMN A B   ; Jump to location B if A != 0.
-    
-    (9)  JMZ A B   ; Jump to location B if A == 0.
-
-    (10) DJN A B   ; Jump to location B if --A != 0.
-
-    (11) DJZ A B   ; Jump to location B if --A == 0.
+    (6)  JMZ A B   ; Jump to location B if A == 0.
         
-    (12) SKE A B   ; Skip next instruction if A == B.
+    (7)  SEQ A B   ; Skip next instruction if A == B.
     
-    (13) SLT A B   ; Skip next instruction if A < B.
-    
-    (14)           ; reserved
+    (8)  SLT A B   ; Skip next instruction if A < B.
+
+    (9)  SNE A B   ; Skip next instruction if A != B.
+
+    (10) FLP A B   ; Jump to location B if system word < A.
+
+    (11) - (13)    ; reserved
+
+    (14) XCH   B   ; Exchange operands at location A.
 
     (15) SPL A     ; Add A to the process queue.
     
@@ -99,9 +90,6 @@ rent instruction and retrieves the number stored at the specified lo-
 cation; this number is then interpreted as  an offset  from its own
 address. The number found  at this second location is the operand.
 
-### Predecrement Indirect "<"
-
-As above, but the operand is decremented before use.
 
 
 # Example

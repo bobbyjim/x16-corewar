@@ -33,7 +33,7 @@ void testIp(char *testname, int location, int resultIp)
     { 
         textcolor(LTBLUE);
         cprintf("test  %5d:  ", location);
-        printCell(expected, "  ");
+        x16_printCell(expected, "  ");
         cprintf("%s  ", testname);
         ++totalTests;
         if (lastTestResult) 
@@ -91,7 +91,7 @@ unsigned char testCell(char *testname, int resultLocation)
     { 
         textcolor(LTBLUE);
         cprintf("test  %5d:  ", resultLocation);
-        printCell(expected, "  ");
+        x16_printCell(expected, "  ");
         cprintf("%s  ", testname);
         ++totalTests;
         if (lastTestResult) 

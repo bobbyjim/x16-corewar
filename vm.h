@@ -1,8 +1,6 @@
 #ifndef _VM_H_
 #define _VM_H_
 
-void setIp(int val);
-int getIp();
-int execute();
+int vm_execute(unsigned char owner, int ip);
 
 #endif

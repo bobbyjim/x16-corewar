@@ -1,0 +1,46 @@
+;Subject: EBS tournament entry
+;From: DURHAM@ricevm1.rice.edu (Mark A. Durham)
+;Date: 20 Nov 91 08:16:43 GMT
+;Message-ID: <91324.02:16:43.756304.DURHAM@ricevm1.rice.edu>
+;
+;Here is my entry into the EBS tournament.  It did not do as well as
+;I would have liked, and therefore I expect it will not do well in the
+;ICWS tournament December 15th.  Thus, I have little to lose by posting
+;it here now.  I will post the others after the ICWS tournament.
+;
+;Looks like I need to spend more time working on my Redcode and less
+;on rec.games.corewar!
+;
+;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+;
+; Divide And Conquer
+;
+; Mark A. Durham
+; November 1, 1991
+
+; Code
+
+         JMP   start                         ; In case END start fails
+
+; This code copies the warrior and splits the copy
+
+source   DAT   #target
+start    MOV   #trap-source,        source   ; Init copy pointer
+         MOV   #2432+source-trap,   target   ; Init destination pointer
+copy     MOV   @source,             <target  ; Copy warrior
+         DJN   copy,                source
+         SPL   @target                       ; Start copy of warrior
+
+; This code traps and kills potential enemy code
+
+         MOV   #164,               target
+enslave  MOV   trap,                @target
+         DJN   enslave,             target
+
+         MOV   #164,               target
+kill     MOV   target,              @target
+         DJN   kill,                target
+
+target   DAT   #2432+source-target            ; Kill self when finished
+trap     SPL   trap
+         END   start

@@ -1,6 +1,14 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#define LOGICAL_FILE_NUM        1
+#define IGNORE_LFN              0
+#define SD_CARD                 8
+#define EMULATOR_FILE_SYSTEM    8
+#define HOST_FILE_SYSTEM        1
+#define SA_IGNORE_HEADER        0
+#define LOAD_FLAG               0
+
 typedef unsigned char byte;
 typedef unsigned int  word;
 

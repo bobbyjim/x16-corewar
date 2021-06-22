@@ -1,0 +1,18 @@
+The ICWS
+tournament is traditionally run under the following conditions:
+
+a) Standard: ICWS'88
+b) Core Size: 8192
+c) Maximum Number of Cycles before declaring a tie: 100 000
+   (a machine cycle executes one instruction from each warrior)
+d) Maximum Number of Tasks per warrior: 64
+e) Warrior Size Limit: 64 instructions (1/128th of core size)
+f) Six rounds of one-on-one, round-robin play.  Each warrior plays three
+   rounds as the initially executing warrior, three mirror rounds as the
+   warrior executing second.  Three load addresses are chosen at random
+   such that the second warrior starts loading no closer than 64
+   instructions (1/128th of core size) to the first.
+g) Scoring is 3 points for a win, 1 point for a tie, and no points for
+   a loss.
+h) The program with the best total score is declared the tournament winner.
+

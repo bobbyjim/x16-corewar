@@ -1,0 +1,418 @@
+Subject: Validation Suite for ICWS'88 Compatibility
+From: DURHAM@ricevm1.rice.edu (Mark A. Durham)
+Date: 20 Nov 91 07:44:14 GMT
+Message-ID: <91324.01:44:14.698697.DURHAM@ricevm1.rice.edu>
+
+Almost from the begining of Core War, there have been calls for a
+validation suite of Redcode programs.  With the vast proliferation of
+Core War systems, it is becoming a much higher priority.  So, I have
+started such a validation suite.
+
+I welcome any assistance anyone offers in the way of interesting
+programs which are likely to ferret out errors in MARS interpretation.
+Note that the very little bit I have included here starts from DAT #0, #0
+and builds from there.
+
+There is only one program with truly interesting behaviour (PVS #7).
+At first you might expect it to terminate on the second cycle, but it
+actually takes three cycles for it to terminate.
+
+Comments on the format are welcome as well.  You should be able to
+cut and paste and assemble these programs directly.
+
+Enjoy,
+MAD
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+Subject: Validation Suite Update
+From: DURHAM@ricevm1.rice.edu (Mark A. Durham)
+Date: 19 Dec 1991 05:43:01 GMT
+Message-ID: <164D814D85.DURHAM@ricevm1.rice.edu>
+
+; Proposed Validation Suite for ICWS'88 Memory Array Redcode Simulators
+; ---------------------------------------------------------------------
+;         Author(s):   Mark A. Durham
+; Last Modification:   December 18, 1991
+
+; Subscripts indicate changes in modes which do not change program
+; behaviour.  $ is used to mean direct mode for clarity.
+
+; ---------------------------------------------------------------------
+
+; PVS #1
+
+start   DAT     #0,     #0
+        END     start
+
+; Result: Failure on first cycle at start
+; Memory: Unchanged
+
+; ---------------------------------------------------------------------
+
+; PVS #2(a-d)
+
+start   DAT     #0,     <1
+change  DAT     #0,     #2      ; b(#,<) c(<,#) d(<,<)
+        END     start
+
+; Result: Failure on first cycle at start
+; Memory: change becomes DAT #0, #1 (one less than 2)
+
+; ---------------------------------------------------------------------
+
+; PVS #3(a-d)
+
+start   DAT     <1,     <1
+change  DAT     #0,     #3      ; b(#,<) c(<,#) d(<,<)
+        END     start
+
+; Result: Failure on first cycle at start
+; Memory: change becomes DAT #0, #1 (two less than 3)
+
+; ---------------------------------------------------------------------
+
+; PVS #4(a-c)
+
+start   JMP     0,      #0      ; b($,$) c($,@)
+        END     start
+
+; Result: No failure
+; Memory: Unchanged
+
+; ---------------------------------------------------------------------
+
+; PVS #5(a-d)
+
+start   JMP      1,     <2
+stop    DAT     #0,     #0
+change  DAT     #0,     #2      ; b(#,<) c(<,#) d(<,<)
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: change becomes DAT #0, #1 (one less than 2)
+
+; ---------------------------------------------------------------------
+
+; PVS #6(a-c)
+
+start   JMP     @0,     #0      ; b(@,$) c(@,@)
+        END     start
+
+; Result: No failure
+; Memory: Unchanged
+
+; ---------------------------------------------------------------------
+
+; PVS #7(a-b)
+
+stop    DAT     #0,     #2      ; b(<,#)
+start   JMP     @0,     <0
+        END     start
+
+; Result: Failure on THIRD! cycle at stop
+; Explanation: The A-field of JMP @0, <0 is evaluated BEFORE the
+;         B-field, and therefore the effective A-address is zero for the
+;         first cycle.  The next cycle, the instruction is JMP @0, <-1.
+;         Again, the A-field is evaluated BEFORE the B-field, and
+;         therefore execution is transferred to stop after its B-field
+;         is decremented.
+; Execution: start, start, stop
+; Memory: start becomes JMP @0, <-1 (one less than 0)
+;         stop becomes DAT #0, #1 (one less than 2)
+
+; ---------------------------------------------------------------------
+
+; PVS #8(a-i)
+
+start   JMP     <2,     #0      ; b,d,f,h(<,$) c,e,g,i(<,@)
+stop    DAT     #0,     #0
+change  DAT     #0,     #0      ; b,c(#,#) d,e(#,<) f,g(<,#) h,i(<,<)
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: change becomes DAT #0, #-1 (one less than 0)
+
+; ---------------------------------------------------------------------
+
+; PVS #9(a-d)
+
+start   JMP     <2,     <2
+stop    DAT     #0,     #0
+change  DAT     #0,     #0      ; b(#,<) c(<,#) d(<,<)
+        END     start
+
+; Result: Failure on second cycle at stop
+; Explanation: The A-field of JMP <2, <2 is completely evaluated before
+;       the B-field is evaluated.  In this case, that means the jump will
+;       be 2 (from <2) plus -1 (from #0 decremented once) = 1 (stop).
+; Memory: change becomes DAT #0, #-2 (two less than 0)
+
+; ---------------------------------------------------------------------
+
+; PVS #10(a-f)
+
+start   MOV     #0,      0      ; b(#,@) c($,$) d($,@) e(@,$) f(@,@)
+stop    DAT     #0,     #0
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: Unchanged
+
+; ---------------------------------------------------------------------
+
+; PVS #11(a-d)
+
+start   MOV     #1,     <2
+stop    DAT     #0,     #0
+change  DAT     #0,     #1      ; b(#,<) c(<,#) d(<,<)
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: Unchanged
+
+; ---------------------------------------------------------------------
+
+; PVS #12
+
+start   MOV      1,     <1
+stop    DAT     #0,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: Unchanged!
+; Explanation: This behaviour is open to interpretation.  If one
+;     "completely" evaluates the A-operand first, one should make a copy
+;     of the instruction labelled "stop" as part of that evaluation.
+;     Then when the B-operand is completely evaluated as
+;     start + 1 + (1 - 1) = stop, the copy of the instruction labelled
+;     "stop" (prior to the decrement) is copied onto the instruction
+;     labelled "stop" (after the decrement), restoring "stop" to its
+;     initial state.
+;              There are those who would argue, and not without
+;     substantial basis, that there is no explicit reference in the
+;     standards to a "copy" and therefore the instruction labelled
+;     "stop" (after the decrement) should be copied onto itself.  Thus
+;     stop would appear as "stop DAT #0, #0" after execution.
+
+; Systems that "copy" the A-operand instruction include The MADgic Core
+;     and Core War Pro.
+
+
+; ---------------------------------------------------------------------
+
+; PVS #13
+
+start   MOV     @0,     <1
+stop    DAT     #0,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: Unchanged
+; Explanation: See explanation under PVS #12
+
+
+; ---------------------------------------------------------------------
+
+; PVS #14(a-b)
+
+start   MOV     <1,      1     ; b(<,@)
+stop    DAT     #0,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #0, #0 (one less than one)
+; Explanation: Here the decrement occurs before the copy.  Therefore,
+;     DAT #0, #0 is moved onto itself.  Note that @1 is evaluated as
+;     start + 1 + 0 = stop since the decrement occurred before the
+;     B-operand was evaluated.
+
+
+; ---------------------------------------------------------------------
+
+; PVS #15
+
+start   MOV     <1,     <2
+stop    DAT     #0,     #1
+change  DAT     #0,     #1      ; b(#,<) c(<,#) d(<,<)
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #0, #0
+;         change becomes a copy of start: DAT #0, #0
+
+
+; ---------------------------------------------------------------------
+
+; PVS #16(a-b)
+
+start   ADD     #1,      1      ; b(#,@)
+stop    DAT     #1,     #0
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #1, #1
+
+
+; ---------------------------------------------------------------------
+
+; PVS #17
+
+start   ADD     #1,     <1
+stop    DAT     #1,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: Unchanged
+
+
+; ---------------------------------------------------------------------
+
+; PVS #18(a-d)
+
+start   ADD      1,      1      ; b($,@) c(@,$) d(@,@)
+stop    DAT     #2,     #0
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #4, #0
+
+
+; ---------------------------------------------------------------------
+
+; PVS #19
+
+start   ADD      1,     <1
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #4, #1
+; Explanation: See the explanation for PVS #12
+
+
+; ---------------------------------------------------------------------
+
+; PVS #20
+
+start   ADD     @0,     <1
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #4, #1
+; Explanation: See the explanation for PVS #12
+
+
+; ---------------------------------------------------------------------
+
+; PVS #21(a-b)
+
+start   ADD     <1,      1      ; b(<,@)
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #4, #0
+
+
+; ---------------------------------------------------------------------
+
+; PVS #22
+
+start   ADD     <1,     <1
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: start becomes ADD <3, <1
+;         stop  becomes DAT #2, #-1 (one decremented twice)
+; Explanation: See explanation of PVS #12
+
+
+; ---------------------------------------------------------------------
+
+; PVS #23(a-b)
+
+start   SUB     #1,      1      ; b(#,@)
+stop    DAT     #1,     #0
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #1, #-1
+
+
+; ---------------------------------------------------------------------
+
+; PVS #24
+
+start   SUB     #1,     <1
+stop    DAT     #1,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #1, #-1
+
+
+; ---------------------------------------------------------------------
+
+; PVS #25(a-d)
+
+start   SUB      1,      1      ; b($,@) c(@,$) d(@,@)
+stop    DAT     #2,     #0
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #0, #0
+
+
+; ---------------------------------------------------------------------
+
+; PVS #26
+
+start   SUB      1,     <1
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #0, #-1
+; Explanation: See the explanation for PVS #12
+
+
+; ---------------------------------------------------------------------
+
+; PVS #27
+
+start   SUB     @0,     <1
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #0, #-1
+; Explanation: See the explanation for PVS #12
+
+
+; ---------------------------------------------------------------------
+
+; PVS #28(a-b)
+
+start   SUB     <1,      1      ; b(<,@)
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: stop becomes DAT #0, #0
+
+
+; ---------------------------------------------------------------------
+
+; PVS #29
+
+start   SUB     <1,     <1
+stop    DAT     #2,     #1
+        END     start
+
+; Result: Failure on second cycle at stop
+; Memory: start becomes SUB <-1, <1
+;         stop  becomes DAT #2, #-1 (one decremented twice)
+; Explanation: See explanation of PVS #12
