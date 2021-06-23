@@ -48,6 +48,10 @@ void repl()
       {
           arena_init(0);
       }
+      else if (! strcmp(lineInputBuffer,"dump"))
+      {
+          process_dump();
+      }
       else if (! strcmp(lineInputBuffer,"randomize"))
       {
           arena_init(1);

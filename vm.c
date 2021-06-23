@@ -1,7 +1,8 @@
+#include <stdio.h>
+
 #include "cell.h"
 #include "arena.h"
 #include "process.h"
-#include "x16.h"
 
 extern Cell arena[CORESIZE];
 
@@ -119,15 +120,12 @@ int vm_execute(unsigned char owner, int ip)
     operandData.A = 0;
     operandData.B = 0;
 
-    if (inst.opcode >= MOV && inst.opcode < JMP) // e.g. not the jumps
+    if (inst.opcode >= MOV && inst.opcode < SEQ) // e.g. not the skips
     {
         data_bad = getOperandAData() 
                  + getOperandBData();
         if (data_bad > 0)
-        {
-            x16_execFail("Error retrieving operand data");
             inst.opcode = HCF;
-        }
     }
 
     switch(inst.opcode)
@@ -154,7 +152,7 @@ int vm_execute(unsigned char owner, int ip)
             break;
 
         case JMP:
-            ip += arena[final].A; // ?? A or B ??
+            ip += final; 
             break;
 
 /*
@@ -207,7 +205,7 @@ int vm_execute(unsigned char owner, int ip)
 
         case FLP: // Jump to location B if A > status word.
             if (  (inst.A > system.status)
-               && (getOperandBData() == 0) )
+               && (getOperandBData() == 0) ) // ok
                  ip = final;
             break;
 
@@ -230,7 +228,6 @@ int vm_execute(unsigned char owner, int ip)
         case HCF:
         fail:
         default:
-            if (isVerbose()) x16_execFail("hcf");
             process_remove(owner, ip);
             return -1; // die
     }

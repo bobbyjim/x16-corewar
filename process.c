@@ -1,3 +1,8 @@
+#ifdef X16
+#else
+#include    <stdio.h>
+#endif
+
 #include "arena.h"
 #include "common.h"
 #include "process.h"
@@ -69,6 +74,19 @@ void process_remove(unsigned char owner, unsigned int address)
     }
 }
 
+void process_dump()
+{
+#ifdef X16
+#else
+    int x, y;
+
+    for(x=0; x<WARRIORS_MAX; ++x)
+       for(y=0; y<WARRIOR_PROCESSES_MAX; ++y)
+          if (process[x][y] > -1)
+             printf("warrior no. %d, process %d: [%u]\n", x, y, process[x][y]);
+#endif
+}
+
 //
 // run for 1 epoch
 // return the number of live warriors
@@ -100,4 +118,3 @@ unsigned char process_runCorewar()
     }
     return liveWarriors;
 }
-

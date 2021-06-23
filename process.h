@@ -8,6 +8,7 @@
 void process_init();
 void process_add(unsigned char owner, unsigned int address);
 void process_remove(unsigned char owner, unsigned int address);
+void process_dump();
 
 unsigned char process_runCorewar();
 

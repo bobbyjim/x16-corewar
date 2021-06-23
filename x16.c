@@ -3,7 +3,8 @@
         This file isolates all of the X16/CC65 specific code.
 
 ****************************************************************************/
-#undef         X16   
+#include "common.h"
+
 
 #ifdef X16
 #include <conio.h>
@@ -15,9 +16,21 @@
 #include <stdlib.h>
 
 #include "x16.h"
-#include "common.h"
 #include "cell.h"
 #include "arena.h"
+
+#ifdef  X16
+void x16_show_banked_message(unsigned int index)
+{
+    unsigned int x;
+
+    for (x=index; x<index+800; ++x)
+       if (PEEK(x) == 0)
+          cputs("\r\n");
+       else  
+          cputc(PEEK(x));
+}
+#endif
 
 void x16_init()
 {
@@ -27,22 +40,14 @@ void x16_init()
    cbm_k_setlfs(0,8,0);
    cbm_k_load(2, 0x0f800);
 
+   x16_loadfile( "text.bin", 0xb000 ); // put useful text at the end of bank 1
    bgcolor(BLACK);
    textcolor(GREEN);
    clrscr();
 
    gotoxy(0,20);
 
-   cputs("  @@@@@@@   @@@@@@   @@@@@@@   @@@@@@@@     @@@  @@@  @@@   @@@@@@   @@@@@@@ \r\n");
-   cputs(" @@@@@@@@  @@@@@@@@  @@@@@@@@  @@@@@@@@     @@@  @@@  @@@  @@@@@@@@  @@@@@@@@\r\n");
-   cputs(" !@@       @@!  @@@  @@!  @@@  @@!          @@!  @@!  @@!  @@!  @@@  @@!  @@@\r\n");
-   cputs(" !@!       !@!  @!@  !@!  @!@  !@!          !@!  !@!  !@!  !@!  @!@  !@!  @!@\r\n");
-   cputs(" !@!       @!@  !@!  @!@!!@!   @!!!:!       @!!  !!@  @!@  @!@!@!@!  @!@!!@! \r\n");
-   cputs(" !!!       !@!  !!!  !!@!@!    !!!!!:       !@!  !!!  !@!  !!!@!!!!  !!@!@!  \r\n");
-   cputs(" :!!       !!:  !!!  !!: :!!   !!:          !!:  !!:  !!:  !!:  !!!  !!: :!! \r\n");
-   cputs(" :!:       :!:  !:!  :!:  !:!  :!:          :!:  :!:  :!:  :!:  !:!  :!:  !:!\r\n");
-   cputs("  ::: :::  ::::: ::  ::   :::   :: ::::      :::: :: :::   ::   :::  ::   :::\r\n");
-   cputs("  :: :: :   : :  :    :   : :  : :: ::        :: :  : :     :   : :   :   : :\r\n");
+   x16_show_banked_message(0xb000);
 
    textcolor(DEFAULT_COLOR);
    gotoxy(0,40);
@@ -71,11 +76,28 @@ void x16_init()
 void x16_help()
 {
 #ifdef X16
-   textcolor(LTBLUE);
-   cputs("add    arena   cls     logout     reset     verbose     run      d %d      help\r\n");
+   textcolor(GREEN);
+   x16_show_banked_message(0xb000 + 800);
+//   cputs("add    arena   cls     logout     reset     verbose     run      d %d      help\r\n");
    textcolor(DEFAULT_COLOR);
 #else
-    printf("add    arena    logout    reset    verbose    run    d <nnn>    help\n");
+puts("-------------------------- CORESHELL COMMANDS --------------------------------");
+puts("");
+puts("cls: clear screen                       logout: quit program                  ");
+puts("reset: clear arena memory               verbose: change output level          ");
+puts("run: run!                               d nnn: display arena from nnn         ");
+puts("help: show this text");
+puts("");
+puts("hcf a b: halt-catch-fire                mov a b                           ");
+puts("add a b: b += a                         sub a b: b -= a   ");
+puts("");
+puts("jmp   b: jump to b                      jmn a b: jmp if a!=0");
+puts("jmz a b: jmp if a==0                    seq a b: ++ip if a==b");
+puts("slt a b: ++ip if a<b                    sne a b: ++ip if a!=b");
+puts("");
+puts("xch a b: exchange a,b at a              spl a b: split to b ");
+puts("");
+puts("------------------------------------------------------------------------------");
 #endif
 }
 

@@ -3,9 +3,9 @@
 unsigned char verbosity = 0;
 char* verbosityLabel[] = 
 {
-    "(quiet mode)",
-    "verbose mode!",
-    "super-verbosity enabled!!"
+    "quiet",
+    "verbose",
+    "max verbosity"
 };
 
 void setVerbosity(unsigned char v) 

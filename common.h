@@ -1,6 +1,16 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+
+/*--------------------------------------------
+"#define X16" to compile for the Commander X16.
+"#undef X16" to compile for UNIX or whatever.
+--------------------------------------------*/
+//#define        X16
+#undef         X16   
+
+
+
 #define LOGICAL_FILE_NUM        1
 #define IGNORE_LFN              0
 #define SD_CARD                 8

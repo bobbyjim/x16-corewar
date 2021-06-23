@@ -92,6 +92,7 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
 
 void loadProgramFromFile(char *name, unsigned int location)
 {
+#ifdef X16
     int line;
     int x;
     char buffer[16];
@@ -124,6 +125,24 @@ void loadProgramFromFile(char *name, unsigned int location)
           && (loadCell(buffer, location) != INVALID_OPCODE) )
             ++location;
     }
+#else
+    FILE *fp = fopen(name, "r");
+    char buf[80];
+    int ok;
+    do
+    {
+        ok = 1;
+        if (fgets(buf, 80, fp) != NULL)
+        {
+            if (loadCell(buf, location) != INVALID_OPCODE)
+                ++location;
+        }
+        else
+           ok = 0;
+    }
+    while(ok);
+    fclose(fp);
+#endif
 }
 
 unsigned char loadCell(char *input, int position)
