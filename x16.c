@@ -11,6 +11,7 @@
 #include <peekpoke.h>
 #else
 #include <stdio.h>
+#include <time.h>
 #endif
 
 #include <stdlib.h>
@@ -74,6 +75,7 @@ void x16_init()
    puts("  :: :: :   : :  :    :   : :  : :: ::        :: :  : :     :   : :   :   : :");
    puts("\n\n\n\n");
 
+   srand(time(0));
 #endif
 
 }
