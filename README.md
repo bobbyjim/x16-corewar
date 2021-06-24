@@ -4,6 +4,32 @@
 
  ref: https://corewar.co.uk/madtutor.txt - 1986 and 1988
 
+# Build the Commander X16 binary
+
+1. On the command, line, type:
+
+make clean
+
+2. Comment out "#define X16" in common.h
+3. Uncomment "#undef X16" in common.h
+
+4. Then, on the command line:
+
+make
+
+# Build the "CC" binary 
+
+1. On the command line, type:
+
+make clean
+
+2. Comment out "#undef X16" in common.h
+3. Uncomment "#define X16" in common.h
+
+4. Then, on the command line:
+
+make -f Makefile.cc
+
 # THE MEMORY CELL
 
 The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
