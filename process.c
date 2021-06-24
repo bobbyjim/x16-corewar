@@ -70,14 +70,14 @@ void process_dump()
           if (process[x][y] > -1)
           {
 #ifdef X16
-             cprintf("%d: warrior no. %d, process %d: [%u]\r\n", ++count, x, y, process[x][y]);
+             cprintf("%2d: warrior no. %d, process %d: [%u]\r\n", ++count, x, y, process[x][y]);
           }
 
-    cprintf("processes: %d\r\n", count);
+    //cprintf("processes: %2d\r\n\r\n", count);
 #else
-             printf("%d: warrior no. %d, process %d: [%u]\n", ++count, x, y, process[x][y]);
+             printf("%2d: warrior no. %d, process %d: [%u]\n", ++count, x, y, process[x][y]);
           }
-    printf("processes: %d\n", count);
+    //printf("processes: %d\n\n", count);
 #endif
      
 }
@@ -92,9 +92,11 @@ unsigned char process_runCorewar()
     unsigned char i;
     unsigned char liveWarriors = 0;
     unsigned char w;
+    unsigned char alive;
 
     for(w=0; w<WARRIORS_MAX; ++w)
     {
+       alive = 0;
        // scan to next valid process
        for(i = currentProcess[w]; i < (currentProcess[w] + WARRIOR_PROCESSES_MAX); ++i)
        {
@@ -106,10 +108,11 @@ unsigned char process_runCorewar()
                // Housekeeping
                // 
                currentProcess[w] = currentPid + 1;
-               ++liveWarriors;
+               alive = 1;
                break; // next warrior
            }
        }
+       liveWarriors += alive;
     }
     return liveWarriors;
 }

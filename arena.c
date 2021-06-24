@@ -7,6 +7,7 @@
 #define  OPCODE(pos) (arena[pos % CORESIZE].opcode)
 
 Cell arena[CORESIZE];
+System corewar_system;
 
 char cellChar[16] = {
    '.',     // hcf

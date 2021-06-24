@@ -6,6 +6,7 @@
 #include "x16.h"
 
 extern Cell arena[CORESIZE];
+extern System corewar_system;
 
 #define     INST        arena[ip]
 
@@ -16,12 +17,6 @@ int             ip, ipNext; //, source, destination, final;
 Cell            SRA,    SRB;
 int             PCA,    PCB;
 int             AValue, BValue;
-
-typedef struct {
-    unsigned int status : 8;
-} System;
-
-System system;
 
 void getOperandAData()
 {
@@ -100,8 +95,8 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
     operandData.A = 0;
     operandData.B = 0;
 */
-    x16_printCell(&INST, "\r\n");
-    printf("   warrior %u, pid %u\n", owner, pid);
+    //x16_printCell(&INST, "\r\n");
+    //printf("   warrior %u, pid %u\n", owner, pid);
 
     getOperandAData();
     getOperandBData();
@@ -122,21 +117,29 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             break;
 
         //
-        //  ADD and SUB works
+        //  ADD and SUB work
         //
         case SUB: 
+            ++corewar_system.status;
             AValue = -AValue;
             // fall thru
         case ADD:
+            ++corewar_system.status;
             arena[PCB].B = (AValue + BValue + CORESIZE) % CORESIZE;
             if (INST.aMode != IMMEDIATE)
                 arena[PCB].A = (SRA.A + SRB.A) % CORESIZE;
             break;
 
+        //
+        //  JMP works
+        //
         case JMP:
             ipNext = PCA;
             break;
 
+        // 
+        // JMN works
+        //
         case JMN: // IP = A if B != 0
             if (BValue != 0) ipNext = PCA;
             break;
@@ -146,22 +149,26 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             break;
 
         case FLP: // Jump to location A if B > status word.
-            if ( (BValue > system.status) ) ipNext = PCA;
+            if ( (BValue > corewar_system.status) ) ipNext = PCA;
             break;
 
         case SEQ: // IP++ if A == B     fall-through
+            ++corewar_system.status;
             if (AValue == BValue) ++ipNext;
             break;
 
         case SNE: // IP++ if A != B     fall-through
+            ++corewar_system.status;
             if (AValue != BValue) ++ipNext;
             break;
 
         case SLT: // IP++ if A  < B
+            ++corewar_system.status;
             if (AValue < BValue) ++ipNext;
             break;
 
         case SPL: // SPLIT!
+            corewar_system.status += 3;
             process_add(owner, PCA);
             break;
 
@@ -170,6 +177,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
         // the B-field of the instruction pointed to by the A-operand.
         //
         case XCH: 
+            corewar_system.status += 3;
             tempMode    = SRA.aMode;
             SRA.aMode   = SRA.bMode;
             SRA.bMode   = tempMode;
@@ -179,12 +187,12 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             break;
 
         case HCF:
+            corewar_system.status += 3;
+            // fall thru
         default:
             process_remove(owner, pid);
             return -1; // die
     }
-
-    ++system.status; // whatever
 
     if (ipNext >= CORESIZE) 
         ipNext -= CORESIZE; // cheaper than a mod

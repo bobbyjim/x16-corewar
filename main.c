@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "x16.h"
 #include "common.h"
@@ -8,8 +9,13 @@
 #include "vm.h"
 #include "process.h"
 
-extern unsigned char totalTests, testsPassed;
+//extern unsigned char totalTests, testsPassed;
 char lineInputBuffer[80];
+unsigned int epoch;
+char filename[80];
+unsigned char warriorCount, curWarriorCount;
+unsigned int warrior = 0;
+int ip = 100;
 
 int readLine()
 {
@@ -23,12 +29,6 @@ int readLine()
 
 void repl()
 {
-   char filename[80];
-   unsigned char warriorCount;
-
-   unsigned int warrior = 0;
-   int ip = 100;
-
    x16_puts("coreshell 1.0\r\n");
    x16_help();
 
@@ -53,7 +53,7 @@ void repl()
       }
       else if (sscanf(lineInputBuffer,"load %s", filename) == 1)
       {
-         //loadProgramFromFile("bomber.red", 100);
+         ip = rand() % CORESIZE;
          loadProgramFromFile( filename, ip );
          x16_arena_dump(ip, ip+10);
          process_add(warrior, ip);
@@ -63,11 +63,37 @@ void repl()
       {
           arena_init(1);
       }
-      else if (! strcmp(lineInputBuffer,"run"))
+      else if (! strcmp(lineInputBuffer,"step"))
       {
           warriorCount = process_runCorewar();
           x16_arena_dump(ip, ip+25);
           process_dump();
+      }
+      else if (! strcmp(lineInputBuffer,"run"))
+      {
+          //process_dump();
+          epoch = 0;
+          warriorCount = process_runCorewar();
+          for(epoch = 0; epoch < 1000; ++epoch)
+          {
+              curWarriorCount = process_runCorewar();
+              if ( curWarriorCount != warriorCount )
+              {
+                  epoch = 0;
+                  printf("**** warriors remaining: %u\n", curWarriorCount);
+              }
+              else if (epoch > 0 && epoch % 100 == 0)
+              {
+                  printf("**** epoch count: %u\n", epoch);
+              }
+              warriorCount = curWarriorCount;
+              //process_dump();
+          }
+          if (warriorCount == 1)
+             printf("winner!\n");
+          else
+             printf("stalemate!\n");
+
       }
       else if (sscanf(lineInputBuffer,"%u", &ip) == 1)
       {

@@ -19,6 +19,8 @@
 #include "cell.h"
 #include "arena.h"
 
+extern System corewar_system;
+
 #ifdef  X16
 void x16_show_banked_message(unsigned int index)
 {
@@ -286,4 +288,10 @@ void x16_arena_dump(int start, int end)
 #endif
       x16_printCell(cell, "\r\n");
    }
+
+#ifdef X16
+    cprintf("st:%u\r\n", corewar_system.status);
+#else
+    printf("st:%u\n", corewar_system.status);
+#endif
 }

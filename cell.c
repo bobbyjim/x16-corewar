@@ -107,6 +107,8 @@ void loadProgramFromFile(char *name, unsigned int location)
     POKE(0x9f61, 1); // bank 1 r38-
     POKE(0x0000, 1); // bank 1 r39+
 
+    cprintf("loading at %u\r\n", location);
+
     cbm_k_setnam(name);
     cbm_k_setlfs(IGNORE_LFN,EMULATOR_FILE_SYSTEM,SA_IGNORE_HEADER);
     cbm_k_load(LOAD_FLAG, address);
@@ -138,6 +140,8 @@ void loadProgramFromFile(char *name, unsigned int location)
     FILE *fp = fopen(name, "r");
     int ok;
     int i;
+
+    printf("loading at %u\n", location);
     do
     {
         ok = 1;
