@@ -23,8 +23,10 @@ int readLine()
 
 void repl()
 {
+   char filename[80];
    unsigned char warriorCount;
 
+   unsigned int warrior = 0;
    int ip = 100;
 
    x16_puts("coreshell 1.0\r\n");
@@ -32,13 +34,14 @@ void repl()
 
    for(;;)
    {      
+      process_dump();
       if (! strcmp(lineInputBuffer,"help")) 
       {
         x16_help();
       }
-      else if (! strcmp(lineInputBuffer,"add"))
+      else if (sscanf(lineInputBuffer, "new %u", &warrior) == 1)
       {
-          process_add(0,ip);
+          process_add(warrior,ip);
       }
       else if (! strcmp(lineInputBuffer, "arena"))
       {
@@ -48,9 +51,13 @@ void repl()
       {
           arena_init(0);
       }
-      else if (! strcmp(lineInputBuffer,"dump"))
+      else if (sscanf(lineInputBuffer,"load %s", filename) == 1)
       {
-          process_dump();
+         //loadProgramFromFile("bomber.red", 100);
+         loadProgramFromFile( filename, ip );
+         x16_arena_dump(ip, ip+10);
+         process_add(warrior, ip);
+         ++warrior;
       }
       else if (! strcmp(lineInputBuffer,"randomize"))
       {
@@ -59,8 +66,10 @@ void repl()
       else if (! strcmp(lineInputBuffer,"run"))
       {
           warriorCount = process_runCorewar();
-      }   
-      else if (sscanf(lineInputBuffer,"ip %d", &ip) == 1)
+          x16_arena_dump(ip, ip+25);
+          process_dump();
+      }
+      else if (sscanf(lineInputBuffer,"%u", &ip) == 1)
       {
           // ip has been reset
       }
@@ -70,8 +79,8 @@ void repl()
       }
       else // maybe its a line?
       {
-          loadCell(lineInputBuffer, ip);
-          ++ip; // why not
+          if (loadCell(lineInputBuffer, ip) != INVALID_OPCODE)             
+            ++ip;
       }
 
       x16_prompt(ip);
@@ -85,14 +94,8 @@ void repl()
 
 int main()
 {
-    unsigned char warriorCount = 0;
-
     x16_init();
-
     process_init();
-    arena_init(0);
     setVerbosity(2);
-
-    loadProgramFromFile("bomber.red", 100); // TODO: move this into the repl 
     repl();
 }

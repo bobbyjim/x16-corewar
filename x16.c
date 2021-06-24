@@ -29,6 +29,8 @@ void x16_show_banked_message(unsigned int index)
           cputs("\r\n");
        else  
           cputc(PEEK(x));
+
+    cputs("\r\n");
 }
 #endif
 
@@ -57,6 +59,7 @@ void x16_init()
 
    _randomize(); 
 #else
+   puts("\n\n\n\n");
    puts("  @@@@@@@   @@@@@@   @@@@@@@   @@@@@@@@     @@@  @@@  @@@   @@@@@@   @@@@@@@ ");
    puts(" @@@@@@@@  @@@@@@@@  @@@@@@@@  @@@@@@@@     @@@  @@@  @@@  @@@@@@@@  @@@@@@@@");
    puts(" !@@       @@!  @@@  @@!  @@@  @@!          @@!  @@!  @@!  @@!  @@@  @@!  @@@");
@@ -67,11 +70,11 @@ void x16_init()
    puts(" :!:       :!:  !:!  :!:  !:!  :!:          :!:  :!:  :!:  :!:  !:!  :!:  !:!");
    puts("  ::: :::  ::::: ::  ::   :::   :: ::::      :::: :: :::   ::   :::  ::   :::");
    puts("  :: :: :   : :  :    :   : :  : :: ::        :: :  : :     :   : :   :   : :");
+   puts("\n\n\n\n");
 
 #endif
 
 }
-
 
 void x16_help()
 {
@@ -86,7 +89,7 @@ puts("");
 puts("cls: clear screen                       logout: quit program                  ");
 puts("reset: clear arena memory               verbose: change output level          ");
 puts("run: run!                               d nnn: display arena from nnn         ");
-puts("help: show this text");
+puts("help: show this text                    new n: add a process                  ");
 puts("");
 puts("hcf a b: halt-catch-fire                mov a b                           ");
 puts("add a b: b += a                         sub a b: b -= a   ");
@@ -104,9 +107,9 @@ puts("--------------------------------------------------------------------------
 void x16_prompt(ip)
 {
 #ifdef X16
-    cprintf("\r\n%u %u ", _heapmemavail(), ip);
+    cprintf("\r\ncoreshell %u bytes free [%u] ", _heapmemavail(), ip);
 #else
-    printf("\n%u ", ip);
+    printf("\ncoreshell [%u] ", ip);
 #endif
 }
 
@@ -118,14 +121,6 @@ void x16_top()
 #endif
 }
 
-void x16_setbank(unsigned char bank)
-{
-#ifdef X16
-    POKE(0x9f61, bank); // r38-
-    POKE(0, bank);      // r39+
-#endif
-}
-
 void x16_loadfile(char* name, unsigned int location)
 {  
 #ifdef X16
@@ -133,10 +128,9 @@ void x16_loadfile(char* name, unsigned int location)
    cbm_k_setlfs(IGNORE_LFN,EMULATOR_FILE_SYSTEM,SA_IGNORE_HEADER);
    cbm_k_load(LOAD_FLAG, location);
 #else
-    // maybe open the file for reading or something?
+   printf("%s (%d)\n", name, location);
 #endif
 }
-
 
 void x16_execFail(char *reason)
 {
@@ -236,7 +230,7 @@ void x16_arena_draw()
     for(pos=0; pos<CORESIZE; ++pos)
     {
        printf("%c", arena_getCellChar(pos));
-       if (pos % 78 == 77) printf("\n");
+       if (pos % 78 == 77) printf("\n ");
     }    
 #endif
 }
@@ -263,42 +257,33 @@ void x16_ps_log(char *msg, unsigned char owner, unsigned char pid, int ip)
 void x16_arena_dump(int start, int end)
 {
    Cell *cell;
-   int x = start;
+   int x;
+   int len = end - start;
 
-   if (end < start) // swap
+   if (len < 0) // swap
    {
       start = end;
-      end = x;
+      len = -len;
    }  
 
    if (isVerbose() < 2) return;
 
-#ifdef X16
-   cprintf("\r\narena %5d:  ", start);
-#else
-   printf("\narena %5d:  ", start);
-#endif
-
-   cell = getLocation(start);
-   x16_printCell(cell, "\r\n");
-
-   for(x=start+1; x<=end; ++x)
+   for(x=0; x<len; ++x)
    {
-      cell = getLocation(x);
+      cell = getLocation(x+start);
 #ifdef X16
-      cprintf("      %5d:  ", x);
+      cprintf(" %5d:  ", x+start);
 #else
-     printf("      %5d:  ", x);
+     printf(" %5d:  ", x+start);
+#endif
+      x16_printCell(cell, "     ");
+
+      cell = getLocation(start+x+len);
+#ifdef X16
+      cprintf(" %5d:  ", start+x+len);
+#else
+     printf(" %5d:  ", start+x+len);
 #endif
       x16_printCell(cell, "\r\n");
    }
-}
-
-unsigned char x16_getByte(int address)
-{
-#ifdef X16
-    return PEEK(address);
-#else   
-    return 0; // ???
-#endif
 }

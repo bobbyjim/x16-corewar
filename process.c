@@ -1,10 +1,12 @@
+#include "common.h"
+
 #ifdef X16
+#include    <conio.h>
 #else
 #include    <stdio.h>
 #endif
 
 #include "arena.h"
-#include "common.h"
 #include "process.h"
 #include "vm.h"
 #include "x16.h"
@@ -52,39 +54,32 @@ void process_add(unsigned char owner, unsigned int address)
 
 }
 
-void process_remove(unsigned char owner, unsigned int address)
+void process_remove(unsigned char owner, unsigned char pid)
 {
-    unsigned char pid;
-    unsigned char found = 255;
-
-    address %= CORESIZE;
-
-    for(pid=0; pid<WARRIOR_PROCESSES_MAX; ++pid)
-        if (process[owner][pid] == address) // found it
-            found = pid;
-
-    if (found <= WARRIOR_PROCESSES_MAX)
-    {
-       process[owner][found] = PROCESS_INVALID; // killed
-       x16_ps_log("remove-process", owner, found, address);
-    }
-    else
-    {
-       x16_ps_log("FAILED remove-process", owner, found, address);
-    }
+    process[owner][pid] = PROCESS_INVALID; // killed
+    x16_ps_log("remove-process", owner, pid, process[owner][pid]);
 }
 
 void process_dump()
 {
-#ifdef X16
-#else
     int x, y;
+    int count = 0;
 
     for(x=0; x<WARRIORS_MAX; ++x)
        for(y=0; y<WARRIOR_PROCESSES_MAX; ++y)
           if (process[x][y] > -1)
-             printf("warrior no. %d, process %d: [%u]\n", x, y, process[x][y]);
+          {
+#ifdef X16
+             cprintf("%d: warrior no. %d, process %d: [%u]\r\n", ++count, x, y, process[x][y]);
+          }
+
+    cprintf("processes: %d\r\n", count);
+#else
+             printf("%d: warrior no. %d, process %d: [%u]\n", ++count, x, y, process[x][y]);
+          }
+    printf("processes: %d\n", count);
 #endif
+     
 }
 
 //
@@ -96,21 +91,21 @@ unsigned char process_runCorewar()
     unsigned char currentPid;
     unsigned char i;
     unsigned char liveWarriors = 0;
-    unsigned char w = WARRIORS_MAX;
+    unsigned char w;
 
-    while(w) 
+    for(w=0; w<WARRIORS_MAX; ++w)
     {
-       --w;
        // scan to next valid process
        for(i = currentProcess[w]; i < (currentProcess[w] + WARRIOR_PROCESSES_MAX); ++i)
        {
            currentPid = i % WARRIOR_PROCESSES_MAX;
            if (process[w][currentPid] != PROCESS_INVALID)
            {
-               currentProcess[w] = currentPid;
-               process[w][currentPid] = vm_execute(w, process[w][currentPid]);
-               //x16_arena_ps(w,currentPid,process[w][currentPid]);
-               //arena_draw();
+               process[w][currentPid] = vm_execute(w, currentPid, process[w][currentPid]);
+               //
+               // Housekeeping
+               // 
+               currentProcess[w] = currentPid + 1;
                ++liveWarriors;
                break; // next warrior
            }

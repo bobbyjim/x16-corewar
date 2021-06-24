@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cell.h"
 #include "arena.h"
@@ -38,9 +39,9 @@ unsigned char encode(char *opcode)
 {
     unsigned char x = 16;
     while(--x)
-       if (!strcmp(opcode, opcodes[x])) return x;
+       if (!strcasecmp(opcode, opcodes[x])) 
+           return x;
 
-//    if EQ(opcode, "nop") return MOV;
     if EQ(opcode, "cmp") return SEQ;
 
     return INVALID_OPCODE;
@@ -92,22 +93,30 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
 
 void loadProgramFromFile(char *name, unsigned int location)
 {
+    char buffer[16];
+
 #ifdef X16
+#include    <conio.h>
+#include    <peekpoke.h>
+
     int line;
     int x;
-    char buffer[16];
 
     unsigned int address = 0xa000;
 
-    x16_setbank(1);
-    x16_loadfile(name, address);
+    POKE(0x9f61, 1); // bank 1 r38-
+    POKE(0x0000, 1); // bank 1 r39+
+
+    cbm_k_setnam(name);
+    cbm_k_setlfs(IGNORE_LFN,EMULATOR_FILE_SYSTEM,SA_IGNORE_HEADER);
+    cbm_k_load(LOAD_FLAG, address);
 
     for(line=0; line<MAX_WARRIOR_LINES; ++line)
     {
         // build up the buffer
         for(x=0; x<16; ++x)
         {
-            buffer[x] = x16_getByte(address);
+            buffer[x] = PEEK(address);
             ++address;
             if (buffer[x] == 0x0a) // done
             {
@@ -117,8 +126,8 @@ void loadProgramFromFile(char *name, unsigned int location)
         }
         if (buffer[0] == ';') // this is just a comment
         {
-            x16_puts(buffer);
-            x16_puts("\r\n");
+            cputs(buffer);
+            cputs("\r\n");
         }
         else
         if ( (strlen(buffer) > 0) 
@@ -127,15 +136,17 @@ void loadProgramFromFile(char *name, unsigned int location)
     }
 #else
     FILE *fp = fopen(name, "r");
-    char buf[80];
     int ok;
+    int i;
     do
     {
         ok = 1;
-        if (fgets(buf, 80, fp) != NULL)
+        if (fgets(buffer, 16, fp) != NULL)
         {
-            if (loadCell(buf, location) != INVALID_OPCODE)
-                ++location;
+            if (loadCell(buffer, location) != INVALID_OPCODE)
+            {
+                location++;
+            }
         }
         else
            ok = 0;
@@ -171,6 +182,9 @@ unsigned char buildTempCell(char *input)
 //    if (sscanf(input, "%s %s %s %s", label, opcode, a, b) == 4)
 //        cprintf("label found: %s\r\n", label);
     if (sscanf(input, "%s %s %s", opcode, a, b) != 3)
+        return INVALID_OPCODE;
+
+    if (opcode[0] == ';') // comment!
         return INVALID_OPCODE;
 
     decodeOperand(a, &amode, &aval);

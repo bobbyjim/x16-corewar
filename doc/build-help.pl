@@ -18,21 +18,27 @@ __DATA__
  :!:       :!:  !:!  :!:  !:!  :!:          :!:  :!:  :!:  :!:  !:!  :!:  !:! 
   ::: :::  ::::: ::  ::   :::   :: ::::      :::: :: :::   ::   :::  ::   ::: 
   :: :: :   : :  :    :   : :  : :: ::        :: :  : :     :   : :   :   : : 
+          
+ -------------------------- CORESHELL COMMANDS -------------------------------
 
--------------------------- CORESHELL COMMANDS --------------------------------
+ cls, clear, help, logout, run                                
 
-cls: clear screen                       logout: quit program                  
-reset: clear arena memory               verbose: change output level          
-run: run!                               d nnn: display arena from nnn         
-help: show this text
+ load <redcode>                                               
 
-hcf a b: halt-catch-fire                mov a b         
-add a b: b += a                         sub a b: b -= a   
+ new n: add a process                      d nnn: display arena from nnn
 
-jmp   b: jump to b                      jmn a b: jmp if a!=0
-jmz a b: jmp if a==0                    seq a b: ++ip if a==b
-slt a b: ++ip if a<b                    sne a b: ++ip if a!=b
 
-xch a b: exchange a,b at a              spl a b: split to b 
+  - - - - - - - - - - - - - -  opcodes:  - - - - - - - - - - - - - - - - - - 
 
-------------------------------------------------------------------------------
+
+ hcf a b: halt-catch-fire                          mov a b 
+
+ add a b: b += a                                   sub a b: b -= a 
+
+ jmp   b                       jmn a b             jmz a b
+
+ seq a b                       slt a b             sne a b
+
+ xch a b: exchange a,b at a                        spl a b: split to b 
+
+ -----------------------------------------------------------------------------
