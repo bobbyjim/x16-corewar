@@ -6,8 +6,8 @@
 "#define X16" to compile for the Commander X16.
 "#undef X16" to compile for UNIX or whatever.
 --------------------------------------------*/
-#define        X16
-//#undef         X16   
+//#define        X16
+#undef         X16   
 
 
 #define LOGICAL_FILE_NUM        1
