@@ -9,14 +9,28 @@
 #define        X16
 //#undef         X16   
 
+/*
+    Thoughts on some core sizes.
 
-#define LOGICAL_FILE_NUM        1
-#define IGNORE_LFN              0
-#define SD_CARD                 8
-#define EMULATOR_FILE_SYSTEM    8
-#define HOST_FILE_SYSTEM        1
-#define SA_IGNORE_HEADER        0
-#define LOAD_FLAG               0
+    78 cols x 52 rows = 4056.
+
+    4093 is prime (and 53 rows).
+ */
+#define     CORESIZE   4093
+
+
+#define     MAX_WARRIOR_LINES       256
+#define     LINE_BUFFER_SIZE        80
+
+#define     MAXIMUM_EPOCHS          10000
+
+#define     LOGICAL_FILE_NUM        1
+#define     IGNORE_LFN              0
+#define     SD_CARD                 8
+#define     EMULATOR_FILE_SYSTEM    8
+#define     HOST_FILE_SYSTEM        1
+#define     SA_IGNORE_HEADER        0
+#define     LOAD_FLAG               0
 
 typedef unsigned char byte;
 typedef unsigned int  word;

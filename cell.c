@@ -9,8 +9,6 @@
 #include "common.h"
 #include "x16.h"
 
-#define     MAX_WARRIOR_LINES       256
-
 char* opcodes[16] = {
 	/*  0 */ "hcf", 
 	/*  1 */ "mov",                            
@@ -37,16 +35,6 @@ Cell* getTempCell() { return &tempCell; }
 unsigned char encode(char *opcode)
 {
     unsigned char x = 16;
-
-    //
-    // the opcode might be "lowercase"
-    //
-    printf("opcode 1: [%s]\r\n", opcode);
-    opcode[0] &= 0b01011111; // 95
-    opcode[1] &= 0b01011111; // 95
-    opcode[2] &= 0b01011111; // 95
-    printf("opcode 2: [%s]\r\n", opcode);
-
     while(--x)
        if (!strcmp(opcode, opcodes[x])) 
            return x;
@@ -103,7 +91,7 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
 
 void loadProgramFromFile(char *name, unsigned int location)
 {
-    char buffer[16];
+    char buffer[LINE_BUFFER_SIZE];
 
 #ifdef X16
 #include    <conio.h>
@@ -126,9 +114,10 @@ void loadProgramFromFile(char *name, unsigned int location)
     for(line=0; line<MAX_WARRIOR_LINES; ++line)
     {
         // build up the buffer
-        for(x=0; x<16; ++x)
+        for(x=0; x<LINE_BUFFER_SIZE; ++x)
         {
-            buffer[x] = PEEK(address);
+            buffer[x] = PEEK(address); // & 224;
+            if (buffer[x] > 96) buffer[x] -= 32;
             ++address;
             if (buffer[x] == 0x0a) // done
             {
@@ -155,7 +144,7 @@ void loadProgramFromFile(char *name, unsigned int location)
     do
     {
         ok = 1;
-        if (fgets(buffer, 16, fp) != NULL)
+        if (fgets(buffer, LINE_BUFFER_SIZE, fp) != NULL)
         {
             if (loadCell(buffer, location) != INVALID_OPCODE)
             {

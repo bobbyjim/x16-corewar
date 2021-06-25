@@ -4,17 +4,6 @@
 #include "common.h"
 #include "cell.h"
 
-/*
-    Thoughts on some core sizes.
-
-    78 cols x 52 rows = 4056.
-
-    4093 is prime (and 53 rows).
-
- */
-
-#define  CORESIZE   4093
-
 #define  RAW_CELL(i)                arena[i % CORESIZE]   
 #define  SET_CELL_B(i,val)          arena[i % CORESIZE].B = val
 #define  SET_CELL_B_MODE(i,mode)    arena[i % CORESIZE].bMode = mode

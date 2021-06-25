@@ -80,14 +80,14 @@ void repl()
           epoch = 0;
           warriorCount = process_runCorewar();
           origWarriorCount = warriorCount;
-          for(epoch = 0; epoch < 10000; ++epoch)
+          for(epoch = 0; epoch < MAXIMUM_EPOCHS; ++epoch)
           {
               curWarriorCount = process_runCorewar();
               if ( curWarriorCount != warriorCount )
               {
                   //epoch = 0;
                   if (curWarriorCount == 0) // a recent change!
-                    epoch = 10000; // done
+                    epoch = MAXIMUM_EPOCHS; // done
 //                  printf("**** warriors remaining: %u\n", curWarriorCount);
               }
               else if (epoch > 0 && epoch % 100 == 0)

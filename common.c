@@ -1,3 +1,6 @@
+#include <string.h>
+#include <ctype.h>
+
 #include "common.h"
 
 unsigned char verbosity = 0;
