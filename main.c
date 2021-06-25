@@ -66,7 +66,7 @@ void repl()
          //
          // Let's skip any initial HCF / DAT instructions.
          //
-         while(getLocation(ip)->opcode == HCF) ++ip;
+         while(arena_getLocation(ip)->opcode == HCF) ++ip;
 
          process_add(warrior, ip);
          ++warrior;

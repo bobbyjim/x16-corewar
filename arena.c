@@ -28,7 +28,7 @@ char cellChar[16] = {
    172      // spl
 };
 
-void clearLocation(int position, unsigned char doRandomize)
+void arena_clearLocation(int position, unsigned char doRandomize)
 {
    // doRandomize:
    //
@@ -54,15 +54,15 @@ void arena_init(unsigned char doRandomize)
 {
    int pos;
    for(pos=0; pos<CORESIZE; ++pos)
-      clearLocation(pos, doRandomize);
+      arena_clearLocation(pos, doRandomize);
 }
 
-Cell* getLocation(int position)
+Cell* arena_getLocation(int position)
 {
    return &arena[ position % CORESIZE];
 }
 
-void setLocation(int position, Cell *copy)
+void arena_setLocation(int position, Cell *copy)
 {
    Cell *tgt = &arena[ position % CORESIZE ];
    tgt->opcode = copy->opcode;

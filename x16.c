@@ -275,7 +275,7 @@ void x16_arena_dump(int start, int end)
 
    for(x=0; x<len; ++x)
    {
-      cell = getLocation(x+start);
+      cell = arena_getLocation(x+start);
 #ifdef X16
       cprintf(" %5d:  ", x+start);
 #else
@@ -283,7 +283,7 @@ void x16_arena_dump(int start, int end)
 #endif
       x16_printCell(cell, "     ");
 
-      cell = getLocation(start+x+len);
+      cell = arena_getLocation(start+x+len);
 #ifdef X16
       cprintf(" %5d:  ", start+x+len);
 #else

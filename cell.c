@@ -167,7 +167,7 @@ unsigned char loadCell(char *input, int position)
     value = buildTempCell(input);
 
     if (value != INVALID_OPCODE)
-        setLocation(position, &tempCell);
+        arena_setLocation(position, &tempCell);
 
     return value;
 }

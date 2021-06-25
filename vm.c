@@ -8,68 +8,58 @@
 extern Cell arena[CORESIZE];
 extern unsigned char corewar_system_status;
 
-#define     INST        arena[ip]
+//#define     INST        arena[ip]
 
+Cell           *inst;
 int             ip,     ipNext; 
-Cell            SRA,    SRB;
+Cell           *SRA,   *SRB;
 int             PCA,    PCB;
 int             AValue, BValue;
 
 void getOperandAData()
 {
-    switch(INST.aMode)
+    switch(inst->aMode)
     {
         case IMMEDIATE: // 
             PCA = ip;
-            AValue = arena[PCA].A;
-
-            //operandData.A = INST.A; // only assign the B field into operand
+            AValue = inst->A;
             break;
 
         case DIRECT: // 
-            PCA = (ip + INST.A) % CORESIZE;
-            AValue = arena[PCA].B;
-
-            //operandData = arena[(ip + INST.A) % CORESIZE];
+            PCA = (ip + inst->A) % CORESIZE;
+            AValue = arena_getLocation(PCA)->B;
             break;
 
         case INDIRECT: // 
-            PCA = (ip + INST.A) % CORESIZE;
-            SRA = arena[PCA];
-            PCA = (PCA + SRA.B) % CORESIZE;
-            AValue = arena[PCA].B;
-
-            //source = arena[(ip + INST.A) % CORESIZE].B;
-            //operandData = arena[(source + ip + INST.A) % CORESIZE];
+            PCA = (ip + inst->A) % CORESIZE;
+            SRA = arena_getLocation(PCA);
+            PCA = (PCA + SRA->B) % CORESIZE;
+            AValue = arena_getLocation(PCA)->B;
             break;
     }
-    SRA = arena[PCA];
+    SRA = arena_getLocation(PCA);
 }
 
 void getOperandBData()
 {
-    switch(INST.bMode)
+    switch(inst->bMode)
     {
         case IMMEDIATE: 
             PCB = ip;
-            //final = ip;
             break;
 
         case DIRECT: 
-            PCB = (ip + INST.B) % CORESIZE;
-            //final = ip + INST.B;
+            PCB = (ip + inst->B) % CORESIZE;
             break;
 
         case INDIRECT: 
-            PCB = (ip + INST.B) % CORESIZE;
-            SRB = arena[PCB];
-            PCB = (PCB + SRB.B) % CORESIZE;
-
-            //final = ip + INST.B + arena[(ip + INST.B)].B;
+            PCB = (ip + inst->B) % CORESIZE;
+            SRB = arena_getLocation(PCB);
+            PCB = (PCB + SRB->B) % CORESIZE;
             break;
     }
-    SRB = arena[PCB];
-    BValue = SRB.B;
+    SRB = arena_getLocation(PCB);
+    BValue = SRB->B;
 
     // adjust the "final" address.
     //if (final > CORESIZE) final -= CORESIZE;
@@ -87,23 +77,23 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
     ip = address; // do this first
     x16_arena_touch(ip, owner);
 
+    inst = arena_getLocation(ip);
     getOperandAData();
     getOperandBData();
 
     ipNext = ip + 1;
 
-    switch(INST.opcode)
+    switch(inst->opcode)
     {
         // 
         //  MOV works
         //
         case MOV:    
             x16_arena_touch(PCB, owner);
-            if (INST.aMode == IMMEDIATE)
-               arena[PCB].B = AValue;
-               //arena[final].B = operandData.A;
+            if (inst->aMode == IMMEDIATE)
+               arena_getLocation(PCB)->B = AValue; // arena[PCB].B = AValue;
             else
-               arena[PCB] = SRA;
+               arena_setLocation(PCB, SRA); // [PCB] = SRA;
             break;
 
         //
@@ -117,8 +107,8 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             ++corewar_system_status;
             x16_arena_touch(PCB, owner);
             arena[PCB].B = (AValue + BValue + CORESIZE) % CORESIZE;
-            if (INST.aMode != IMMEDIATE)
-                arena[PCB].A = (SRA.A + SRB.A) % CORESIZE;
+            if (inst->aMode != IMMEDIATE)
+                arena_getLocation(PCB)->A = (SRA->A + SRB->B) % CORESIZE; // arena[PCB].A = (SRA.A + SRB.A) % CORESIZE;
             break;
 
         //
@@ -145,7 +135,8 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
 
         case DJN:
            x16_arena_touch(PCB, owner);
-           arena[PCB].B = (arena[PCB].B + CORESIZE - 1) % CORESIZE;
+           arena_getLocation(PCB)->B = (arena_getLocation(PCB)->B + CORESIZE - 1) % CORESIZE;
+           //arena[PCB].B = (arena[PCB].B + CORESIZE - 1) % CORESIZE;
             if (BValue != 1)     // ((BValue-1) != 0) 
                ipNext = PCA;
             break;
@@ -178,12 +169,12 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             x16_arena_touch(PCA, owner);
             x16_arena_touch(PCB, owner);
             corewar_system_status += 3;
-            tempMode    = SRA.aMode;
-            SRA.aMode   = SRA.bMode;
-            SRA.bMode   = tempMode;
-            tempOperand = SRA.A;
-            SRA.A       = SRA.B;
-            SRA.B       = tempOperand;
+            tempMode    = SRA->aMode;
+            SRA->aMode   = SRA->bMode;
+            SRA->bMode   = tempMode;
+            tempOperand = SRA->A;
+            SRA->A       = SRA->B;
+            SRA->B       = tempOperand;
             //
             //  I betcha we have to write these back to the arena!
             //
