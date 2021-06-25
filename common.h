@@ -16,7 +16,7 @@
 
     In order to have 8000 locations:
     * to get CC65 optimization, we'd expand the cell structure to _EIGHT_ bytes.
-    * we'd move the arena into 64 RAM banks.
+    * we'd move the arena into 8 RAM banks, 1000 locations per bank.
 
  */
 #define     CORESIZE                4093
@@ -25,7 +25,7 @@
 #define     MAX_WARRIOR_LINES       256
 #define     LINE_BUFFER_SIZE        80
 
-#define     MAXIMUM_EPOCHS          10000
+#define     MAXIMUM_EPOCHS          5000
 
 #define     LOGICAL_FILE_NUM        1
 #define     IGNORE_LFN              0

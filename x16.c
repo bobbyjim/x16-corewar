@@ -22,7 +22,7 @@
 
 extern unsigned char corewar_system_status;
 
-unsigned char x16_stepMode;
+unsigned char x16_stepMode = 0;
 
 #ifdef  X16
 void x16_show_banked_message(unsigned int index)
@@ -239,7 +239,7 @@ void x16_arena_touch(int ip, unsigned char owner)
     unsigned char x = ip % 156;
     unsigned char c = ip % 2;
 
-    if (x16_stepMode) return;
+    if (x16_stepMode > 0) return;
 
     c = c==0? SQUARE_SW : SQUARE_SE;
 
