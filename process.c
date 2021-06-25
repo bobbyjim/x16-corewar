@@ -71,15 +71,10 @@ void process_dump()
           {
 #ifdef X16
              cprintf("%2d: warrior no. %d, process %d: [%u]\r\n", ++count, x, y, process[x][y]);
-          }
-
-    //cprintf("processes: %2d\r\n\r\n", count);
 #else
              printf("%2d: warrior no. %d, process %d: [%u]\n", ++count, x, y, process[x][y]);
-          }
-    //printf("processes: %d\n\n", count);
 #endif
-     
+          }     
 }
 
 //

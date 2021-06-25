@@ -12,8 +12,8 @@ System corewar_system;
 char cellChar[16] = {
    '.',     // hcf
    95,      // mov
-   '+',
-   '-',
+   '+',     // add
+   '-',     // sub
    94,      // jmp
    172,     // jmn
    187,     // jmz
@@ -21,7 +21,7 @@ char cellChar[16] = {
    190,     // slt
    195,     // sne
    195,     // flp
-   '?',     // 
+   216,     // djn
    '?',     // 
    '?',     // 
    215,     // xch

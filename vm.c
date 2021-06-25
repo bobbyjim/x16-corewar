@@ -88,6 +88,8 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
     unsigned char tempOperand;
     
     ip = address; // do this first
+    x16_arena_touch(ip, owner);
+
 /*
     operandData.opcode = 0;
     operandData.aMode = 0;
@@ -109,6 +111,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
         //  MOV works
         //
         case MOV:    
+            x16_arena_touch(PCB, owner);
             if (INST.aMode == IMMEDIATE)
                arena[PCB].B = AValue;
                //arena[final].B = operandData.A;
@@ -125,6 +128,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             // fall thru
         case ADD:
             ++corewar_system.status;
+            x16_arena_touch(PCB, owner);
             arena[PCB].B = (AValue + BValue + CORESIZE) % CORESIZE;
             if (INST.aMode != IMMEDIATE)
                 arena[PCB].A = (SRA.A + SRB.A) % CORESIZE;
@@ -153,7 +157,8 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             break;
 
         case DJN:
-            arena[PCB].B = (arena[PCB].B + CORESIZE - 1) % CORESIZE;
+           x16_arena_touch(PCB, owner);
+           arena[PCB].B = (arena[PCB].B + CORESIZE - 1) % CORESIZE;
             if (BValue != 1)     // ((BValue-1) != 0) 
                ipNext = PCA;
             break;
@@ -183,6 +188,8 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
         // the B-field of the instruction pointed to by the A-operand.
         //
         case XCH: 
+            x16_arena_touch(PCA, owner);
+            x16_arena_touch(PCB, owner);
             corewar_system.status += 3;
             tempMode    = SRA.aMode;
             SRA.aMode   = SRA.bMode;
@@ -190,6 +197,9 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             tempOperand = SRA.A;
             SRA.A       = SRA.B;
             SRA.B       = tempOperand;
+            //
+            //  I betcha we have to write these back to the arena!
+            //
             break;
 
         case HCF:

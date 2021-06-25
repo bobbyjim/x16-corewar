@@ -71,7 +71,7 @@ void repl()
       }
       else if (! strcmp(lineInputBuffer,"run"))
       {
-          //process_dump();
+          x16_top();
           epoch = 0;
           warriorCount = process_runCorewar();
           for(epoch = 0; epoch < 1000; ++epoch)
@@ -80,11 +80,11 @@ void repl()
               if ( curWarriorCount != warriorCount )
               {
                   epoch = 0;
-                  printf("**** warriors remaining: %u\n", curWarriorCount);
+//                  printf("**** warriors remaining: %u\n", curWarriorCount);
               }
               else if (epoch > 0 && epoch % 100 == 0)
               {
-                  printf("**** epoch count: %u\n", epoch);
+//                  printf("**** epoch count: %u\n", epoch);
               }
               warriorCount = curWarriorCount;
               //process_dump();

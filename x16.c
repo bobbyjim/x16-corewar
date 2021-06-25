@@ -242,8 +242,22 @@ void x16_arena_draw()
 void x16_arena_ps(unsigned char owner, unsigned char pid, char *opcode)
 {
 #ifdef X16
-   gotoxy((owner % 4) * 10, (pid % 4) * 10);
+   gotoxy((owner % 4) * 20, pid % 4);
    cputs(opcode);
+#else
+    printf("%u:%u %s", owner, pid, opcode);
+#endif
+}
+
+void x16_arena_touch(int ip, unsigned char owner)
+{
+    unsigned char y = ip / 78;
+    unsigned char x = ip % 78;
+
+#ifdef X16
+   textcolor(owner+1);
+   cputcxy(x, y, (char)172);
+   textcolor(DEFAULT_COLOR);
 #else
     printf("%u:%u %s", owner, pid, opcode);
 #endif
