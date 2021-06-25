@@ -120,6 +120,13 @@ void x16_prompt(int ip)
 void x16_top()
 {
 #ifdef X16
+      gotoxy(0,0);
+#endif
+}
+
+void x16_clrscr()
+{
+#ifdef X16
       clrscr();
       gotoxy(0,0);
 #endif
@@ -223,7 +230,7 @@ void x16_arena_draw()
    int pos;
 
 #ifdef X16
-   gotoxy(1,5);
+   gotoxy(1,6);
    for(pos=0; pos<CORESIZE; ++pos)
    {
       cputc(arena_getCellChar(pos));
@@ -256,7 +263,7 @@ void x16_arena_touch(int ip, unsigned char owner)
 
 #ifdef X16
    textcolor(owner+1);
-   cputcxy(x, y, (char)172);
+   cputcxy(x, 6+y, (char)172);
    textcolor(DEFAULT_COLOR);
 #else
     printf("%u:%u %s", owner, pid, opcode);

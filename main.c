@@ -71,15 +71,18 @@ void repl()
       }
       else if (! strcmp(lineInputBuffer,"run"))
       {
-          x16_top();
+          x16_clrscr();
+          x16_arena_draw();
           epoch = 0;
           warriorCount = process_runCorewar();
-          for(epoch = 0; epoch < 1000; ++epoch)
+          for(epoch = 0; epoch < 10000; ++epoch)
           {
               curWarriorCount = process_runCorewar();
               if ( curWarriorCount != warriorCount )
               {
                   epoch = 0;
+                  if (curWarriorCount == 0) // a recent change!
+                    epoch = 10000; // done
 //                  printf("**** warriors remaining: %u\n", curWarriorCount);
               }
               else if (epoch > 0 && epoch % 100 == 0)
@@ -89,6 +92,7 @@ void repl()
               warriorCount = curWarriorCount;
               //process_dump();
           }
+          x16_top();
           if (warriorCount == 1)
              printf("winner!\n");
           else
@@ -114,7 +118,7 @@ void repl()
       if (! readLine()) continue;
       if (! strcmp(lineInputBuffer,"logout")) return;
 
-      x16_top();
+      x16_clrscr();
    }
 }
 

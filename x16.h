@@ -7,6 +7,7 @@ void x16_init();
 void x16_help();
 void x16_prompt(int ip);
 void x16_top();
+void x16_clrscr();
 
 void x16_execFail(char *reason);
 void x16_printCell(Cell *cell, char* postfix);
