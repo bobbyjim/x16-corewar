@@ -8,13 +8,8 @@
 #define  SET_CELL_B(i,val)          arena[i % CORESIZE].B = val
 #define  SET_CELL_B_MODE(i,mode)    arena[i % CORESIZE].bMode = mode
 
-typedef struct {
-    unsigned int status : 8;
-} System;
-
 void arena_init(unsigned char doRandomize);
 
-char arena_getCellChar(int ip);
 Cell* getLocation(int x);
 void setLocation(int x, Cell *copy);
 void clearLocation(int position, unsigned char doRandomize);

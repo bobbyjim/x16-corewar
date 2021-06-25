@@ -1,4 +1,4 @@
-# x16-corewar - a Corewar VM
+# x16-corewar - a Core War VM
 
 # What is a core war?
 
@@ -39,8 +39,13 @@ This core implementation is engineered with the following environment:
 
 * SPL supports up to 8 processes per warrior.
 
+# Redcode file notes
 
+* START EVERY FILE WITH THREE SEMICOLONS (';;;')!!
 
+The Commander X16 literally throws away the first two bytes of any file it reads in; Therefore, I strongly suggest you begin every redcode file with three semicolons -- by the way, this is a great place to hold the name of the warrior.  I may check for that name in the future.
+
+Otherwise, refer to the URL references for general instructions.
 
 # Arena Architecture
 
@@ -61,23 +66,15 @@ memory manipulations are in the ARENA.
 
 All address arithmetic is done modulo the size of the ARENA.
 
-CORE is typically initialized to DAT 0, 0.  However, it might instead be initialized to DAT #nnn, #nnn, where nnn is a number from 0 to 255.
+CORE is typically initialized to DAT #0, #0.  However, it might instead be initialized to DAT #nnn, #nnn, where nnn is a number from 0 to 255.
 
 I prefer to set CORE as a prime number, to confound trivial bombing programs a bit.
 
-# Redcode file notes
-
-* START EVERY FILE WITH THREE SEMICOLONS (';;;')!!
-
-The Commander X16 literally throws away the first two bytes of any file it reads in; Therefore, I strongly suggest you begin every redcode file with three semicolons -- by the way, this is a great place to hold the name of the warrior.  I may check for that name in the future.
-
-Otherwise, refer to the URL references for general instructions.
-
 # Opcodes
 
-     DAT   B   ; Remove process from the process queue.  
+     DAT A B   ; Remove process from the process queue.  
 
-     HCL   B   ; Same as DAT. Comes from the 1970s "Halt and Catch Fire" joke opcode.
+     HCL A B   ; Same as DAT. Comes from the 1970s "Halt and Catch Fire" joke opcode.
 
      MOV A B   ; Move A into location B.
     
@@ -85,12 +82,14 @@ Otherwise, refer to the URL references for general instructions.
 
      SUB A B   ; B -= A 
         
-     JMP   B   ; Jump to location B.
+     JMP A B   ; Jump to location A.
     
-     JMN A B   ; Jump to location B if A != 0.
+     JMN A B   ; Jump to location A if B != 0.
     
-     JMZ A B   ; Jump to location B if A == 0.
+     JMZ A B   ; Jump to location A if B == 0.
         
+     FLP A B   ; Jump to location A if system word < B.
+
      CMP A B   ; Skip next instruction if A == B.
 
      SEQ A B   ; Same as CMP.
@@ -99,13 +98,11 @@ Otherwise, refer to the URL references for general instructions.
 
      SNE A B   ; Skip next instruction if A != B.
 
-     FLP A B   ; Jump to location B if system word < A.
-
      DJN A B   ; Decrement B, and then jump to A if B > 0.
 
-     XCH   B   ; Exchange operands at location A.
+     XCH A B   ; Exchange operands at location A.
 
-     SPL A     ; Add A to the process queue.
+     SPL A B   ; Add A to the process queue.
     
 Even though there are 16 opcodes, two are aliases, so in reality there are only 14 slots used.  This means there are still two unused opcode slots.  Suggestions welcome.
 
@@ -153,7 +150,7 @@ I totally jettisoned it.  This one is too powerful and encourages
 excessively short IMP-like programs that have no brain whatsoever.
 Gone, good bye, good riddance.
 
-# Example
+### Example
 
     MOV  3  @2	; move the instruction 3 cells down to the address pointed to at address [+2].
     ADD #5   1	; add 5 to the number stored at the next address.
@@ -170,11 +167,7 @@ The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
     b operand: 12 bits
 
 CC65 optimizes structures that are power-of-two sizes, so 4 bytes is the 
-golden size.  If I increased the size for whatever reason, I'd probably
-want to go straight up to 8 bytes and put the arena in banked RAM.  However,
-that would take a performance hit, so I'd also want to put some logic up
-in assembly language.  In other words, the whole effort would be a major
-update requiring a lot of effort.
+golden size.
 
 The operand size (signed 12 bits) limits the memory window size to 4096 cells. 
 I think that's okay.  The arena/core is a bit short of 4K cells in size.
@@ -204,3 +197,29 @@ make clean
 4. Then, on the command line:
 
 make -f Makefile.cc
+
+# TO DO
+
+## Larger Arena
+
+At some point I am going to want an 8,000 cell arena.  This will require moving the arena to banked RAM.
+Here's how I plan to do it:
+
+(1) Change the cell structure to:
+
+    opcode:     8 bits
+    flags:      8 bits
+    a-mode:     8 bits
+    a operand: 16 bits
+    b-mode:     8 bits
+    b operand: 16 bits
+
+I'd move to 8 bytes per cell because CC65 optimizes in powers of two.
+
+(2) Move to banked RAM.
+
+8000 cells x 8 bytes per cell = 1000 cells per bank = 8 banks of RAM.
+
+(3) Move some code into assembly language.
+
+I have no idea what code would move nicely into asm.  But it's on the table.

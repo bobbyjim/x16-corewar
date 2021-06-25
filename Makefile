@@ -13,7 +13,7 @@ OBJDIR  = .obj
 OBJECTS = $(SOURCES:%.c=$(OBJDIR)/%.o)
 
 .SUFFIXES: 
-all: $(PROGRAM)
+all: clean $(PROGRAM)
 
 ifneq (($MAKECMDGOALS),clean)
 -include $(SOURCES:.c=.d)

@@ -29,8 +29,8 @@ char* opcodes[16] = {
 };
 
 Cell tempCell;
-
 Cell* getTempCell() { return &tempCell; }
+unsigned char loadedOpcode;
 
 unsigned char encode(char *opcode)
 {
@@ -116,7 +116,7 @@ void loadProgramFromFile(char *name, unsigned int location)
         // build up the buffer
         for(x=0; x<LINE_BUFFER_SIZE; ++x)
         {
-            buffer[x] = PEEK(address); // & 224;
+            buffer[x] = PEEK(address); 
             if (buffer[x] > 96) buffer[x] -= 32;
             ++address;
             if (buffer[x] == 0x0a) // done
@@ -131,9 +131,8 @@ void loadProgramFromFile(char *name, unsigned int location)
             cputs("\r\n");
         }
         else
-        if ( (strlen(buffer) > 0) 
-          && (loadCell(buffer, location) != INVALID_OPCODE) )
-            ++location;
+        if ( (strlen(buffer) > 0) && (loadCell(buffer, location) != INVALID_OPCODE) )
+           location++;
     }
 #else
     FILE *fp = fopen(name, "r");
@@ -146,10 +145,8 @@ void loadProgramFromFile(char *name, unsigned int location)
         ok = 1;
         if (fgets(buffer, LINE_BUFFER_SIZE, fp) != NULL)
         {
-            if (loadCell(buffer, location) != INVALID_OPCODE)
-            {
-                location++;
-            }
+           if (loadCell(buffer, location) != INVALID_OPCODE)
+              location++;
         }
         else
            ok = 0;
@@ -159,6 +156,11 @@ void loadProgramFromFile(char *name, unsigned int location)
 #endif
 }
 
+/*
+ 
+    Return the loaded opcode
+
+ */
 unsigned char loadCell(char *input, int position)
 {
     unsigned char value;
@@ -184,7 +186,7 @@ unsigned char buildTempCell(char *input)
     
 //    if (sscanf(input, "%s %s %s %s", label, opcode, a, b) == 4)
 //        cprintf("label found: %s\r\n", label);
-    if (sscanf(input, "%s %s %s", opcode, a, b) != 3)
+    if (sscanf(input, " %3s %s %s", opcode, a, b) != 3)
         return INVALID_OPCODE;
 
     if (opcode[0] == ';') // comment!

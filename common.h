@@ -1,7 +1,6 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-
 /*--------------------------------------------
 "#define X16" to compile for the Commander X16.
 "#undef X16" to compile for UNIX or whatever.
@@ -13,11 +12,15 @@
     Thoughts on some core sizes.
 
     78 cols x 52 rows = 4056.
+    4093 is prime.
 
-    4093 is prime (and 53 rows).
+    In order to have 8000 locations:
+    * to get CC65 optimization, we'd expand the cell structure to _EIGHT_ bytes.
+    * we'd move the arena into 64 RAM banks.
+
  */
-#define     CORESIZE   4093
-
+#define     CORESIZE                4093
+#define     INVALID_LOCATION        30000
 
 #define     MAX_WARRIOR_LINES       256
 #define     LINE_BUFFER_SIZE        80
@@ -53,9 +56,9 @@ typedef unsigned int  word;
 
 #define     CIRCLE_FILLED   209
 #define     CIRCLE_EMPTY    215
-
-void setVerbosity(unsigned char v);
-void bumpVerbosity();
-unsigned char isVerbose();
+#define     SQUARE_NW       190
+#define     SQUARE_NE       188
+#define     SQUARE_SW       187
+#define     SQUARE_SE       172
 
 #endif

@@ -15,6 +15,8 @@ char filename[80];
 unsigned char warriorCount, origWarriorCount, curWarriorCount, lastWarrior;
 unsigned int warrior = 0;
 
+extern unsigned char x16_stepMode;
+
 int readLine()
 {
    if (!fgets(lineInputBuffer, sizeof(lineInputBuffer), stdin)) 
@@ -29,7 +31,7 @@ void repl()
 {
     int ip = 100;
 
-   x16_puts("coreshell 1.0\r\n");
+   x16_putLine("coreshell 1.0");
    x16_help();
 
    for(;;)
@@ -47,34 +49,38 @@ void repl()
       {
           process_add(warrior,ip);
       }
-      else if (! strcmp(lineInputBuffer, "arena"))
-      {
-          x16_arena_draw();
-      }
       else if (! strcmp(lineInputBuffer,"clear"))
       {
           arena_init(0);
+      }
+      else if (! strcmp(lineInputBuffer,"random"))
+      {
+          arena_init(1);
       }
       else if (sscanf(lineInputBuffer,"load %s", filename) == 1)
       {
          ip = rand() % CORESIZE;
          loadProgramFromFile( filename, ip );
          x16_arena_dump(ip, ip+10);
+
+         //
+         // Let's skip any initial HCF / DAT instructions.
+         //
+         while(getLocation(ip)->opcode == HCF) ++ip;
+
          process_add(warrior, ip);
          ++warrior;
       }
-      else if (! strcmp(lineInputBuffer,"randomize"))
-      {
-          arena_init(1);
-      }
       else if (! strcmp(lineInputBuffer,"step"))
       {
+          x16_stepMode = 1;
           warriorCount = process_runCorewar();
           x16_arena_dump(ip, ip+25);
           process_dump();
       }
       else if (! strcmp(lineInputBuffer,"run"))
       {
+          x16_stepMode = 0;
           x16_clrscr();
           x16_arena_draw();
           epoch = 0;
@@ -86,13 +92,16 @@ void repl()
               if ( curWarriorCount != warriorCount )
               {
                   //epoch = 0;
-                  if (curWarriorCount == 0) // a recent change!
+                  if ( (curWarriorCount == 0) 
+                    || (origWarriorCount > 1 && curWarriorCount == 1) )
+                  {
                     epoch = MAXIMUM_EPOCHS; // done
-//                  printf("**** warriors remaining: %u\n", curWarriorCount);
+//                  x16_putValue("**** warriors remaining: ", curWarriorCount);
+                  }
               }
               else if (epoch > 0 && epoch % 100 == 0)
               {
-//                  printf("**** epoch count: %u\n", epoch);
+//                  x16_putValue("**** epoch count: ", epoch);
               }
               warriorCount = curWarriorCount;
               //process_dump();
@@ -100,11 +109,11 @@ void repl()
           x16_top();
           lastWarrior = process_lastWarrior();
           if (warriorCount == 1)
-             printf("winner: warrior no. %u!\n", lastWarrior);
+             x16_putValue("winner: warrior no. ", lastWarrior);
           else if (origWarriorCount == 1)
-             printf("suicide!\n");
+             x16_putLine("suicide!");
           else
-             printf("stalemate!\n");
+             x16_putLine("stalemate!");
 
       }
       else if (sscanf(lineInputBuffer,"%u", &ip) == 1)
@@ -134,7 +143,6 @@ int main()
 {
     x16_init();
     process_init();
-    setVerbosity(2);
     repl();
     return 0;
 }

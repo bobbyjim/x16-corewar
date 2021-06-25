@@ -26,14 +26,14 @@ __DATA__
 
 
  ----------------------------- cli commands ----------------------------------
-                                                                             
-                                                          
+                                                                     
+                                         
 
- cls, clear, help, logout, step run    
+    cls   clear   help   logout   opcodes   random   run 
 
- load <redcode file>                                     
+    load <redcode file>                     step: run one epoch
 
- new n: add a process                      d nnn: display arena from nnn
+    new n: add a process                    d nnn: display arena from nnn
 
 
 

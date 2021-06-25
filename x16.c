@@ -20,7 +20,9 @@
 #include "cell.h"
 #include "arena.h"
 
-extern System corewar_system;
+extern unsigned char corewar_system_status;
+
+unsigned char x16_stepMode;
 
 #ifdef  X16
 void x16_show_banked_message(unsigned int index)
@@ -85,13 +87,12 @@ void x16_help()
 #ifdef X16
    textcolor(GREEN);
    x16_show_banked_message(0xb000 + 800);
-//   cputs("add    arena   cls     logout     reset     verbose     run      d %d      help\r\n");
    textcolor(DEFAULT_COLOR);
 #else
 puts("-------------------------- CORESHELL COMMANDS --------------------------------");
 puts("");
 puts("cls: clear screen                       logout: quit program                  ");
-puts("reset: clear arena memory               verbose: change output level          ");
+puts("reset: clear arena memory                         ");
 puts("run: run!                               d nnn: display arena from nnn         ");
 puts("help: show this text                    new n: add a process                  ");
 puts("");
@@ -122,7 +123,8 @@ void x16_opcode_help()
 void x16_prompt(int ip)
 {
 #ifdef X16
-    cprintf("\r\ncoreshell %u bytes free [%u] ", _heapmemavail(), ip);
+    //cprintf("\r\ncoreshell %u bytes free [%u] ", _heapmemavail(), ip);
+    cprintf("\r\ncoreshell [%u] ", ip);
 #else
     printf("\ncoreshell [%u] ", ip);
 #endif
@@ -154,20 +156,6 @@ void x16_loadfile(char* name, unsigned int location)
 #endif
 }
 
-void x16_execFail(char *reason)
-{
-    if (isVerbose())
-    {
-#ifdef X16
-        textcolor(LTRED);
-        cprintf("                                     rm: %s\r\n", reason);
-        textcolor(DEFAULT_COLOR);
-#else
-        printf("rm: %s\b", reason);
-#endif
-    }
-}
-
 void x16_printCell(Cell *cell, char* postfix)
 {
 #ifdef X16
@@ -193,67 +181,45 @@ void x16_printCell(Cell *cell, char* postfix)
 #endif
 }
 
-void x16_pos(unsigned char x, unsigned char y)              
-{ 
-#ifdef X16
-    gotoxy(x,y);
-#endif
-}
-
-void x16_putc(char c)
+void x16_putLine(char* s)
 {
 #ifdef X16
-    cputc(c);
-#else   
-    printf("%c", c);
-#endif
-}
-
-void x16_putcxy(unsigned char x, unsigned char y, char c)
-{
-#ifdef X16
-    cputcxy(x,y,c);
+    cprintf("%s\r\n", s);
 #else
-    printf("%c", c);
+    printf("%s\n", s);
 #endif
 }
 
-void x16_puts(char* s)
+void x16_putValue(char* label, unsigned int value)
 {
 #ifdef X16
-    cputs(s);
+   cprintf("%s %u\r\n", label, value);
 #else
-    printf("%s", s);
-#endif
-}
-
-void x16_putsxy(unsigned char x, unsigned char y, char* s)
-{
-#ifdef X16
-    cputsxy(x,y,s);
-#else
-    printf("%s", s);
+   printf("%s %u\n", label, value);
 #endif
 }
 
 void x16_arena_draw()
 {
    int pos;
+   unsigned char y;
+   unsigned char x;
 
 #ifdef X16
    gotoxy(1,6);
    for(pos=0; pos<CORESIZE; ++pos)
    {
-      cputc('.'); //arena_getCellChar(pos));
-      if (pos % 78 == 77) cputs("\r\n ");
+       y = pos / 156;
+       x = pos % 156;
+       cputcxy(1+x,6+y,'.');
    }
 #else
     printf(" ");
-    for(pos=0; pos<CORESIZE; ++pos)
+    for(pos=0; pos<CORESIZE/2; ++pos)
     {
-       printf("%c", '.'); // arena_getCellChar(pos));
+       printf("%c", '.');
        if (pos % 78 == 77) printf("\n ");
-    }    
+    }  
 #endif
 }
 
@@ -269,15 +235,20 @@ void x16_arena_ps(unsigned char owner, unsigned char pid, char *opcode)
 
 void x16_arena_touch(int ip, unsigned char owner)
 {
-    unsigned char y = ip / 78;
-    unsigned char x = ip % 78;
+    unsigned char y = ip / 156;
+    unsigned char x = ip % 156;
+    unsigned char c = ip % 2;
+
+    if (x16_stepMode) return;
+
+    c = c==0? SQUARE_SW : SQUARE_SE;
 
 #ifdef X16
    textcolor(owner+2);
-   cputcxy(1+x, 6+y, CIRCLE_FILLED);
+   cputcxy(1+x, 6+y, c); // was: CIRCLE_FILLED
    textcolor(DEFAULT_COLOR);
 #else
-    printf("%u:%u %s", owner, pid, opcode);
+    printf("%u @ %u\n\n", owner, ip);
 #endif
 }
 
@@ -302,8 +273,6 @@ void x16_arena_dump(int start, int end)
       len = -len;
    }  
 
-   if (isVerbose() < 2) return;
-
    for(x=0; x<len; ++x)
    {
       cell = getLocation(x+start);
@@ -324,8 +293,8 @@ void x16_arena_dump(int start, int end)
    }
 
 #ifdef X16
-    cprintf("st:%u\r\n", corewar_system.status);
+    cprintf("st:%u\r\n", corewar_system_status);
 #else
-    printf("st:%u\n", corewar_system.status);
+    printf("st:%u\n", corewar_system_status);
 #endif
 }

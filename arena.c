@@ -7,7 +7,7 @@
 #define  OPCODE(pos) (arena[pos % CORESIZE].opcode)
 
 Cell arena[CORESIZE];
-System corewar_system;
+unsigned char corewar_system_status;
 
 char cellChar[16] = {
    '.',     // hcf
@@ -27,11 +27,6 @@ char cellChar[16] = {
    215,     // xch
    172      // spl
 };
-
-char arena_getCellChar(int ip)
-{
-   return cellChar[ OPCODE(ip) ];
-}
 
 void clearLocation(int position, unsigned char doRandomize)
 {

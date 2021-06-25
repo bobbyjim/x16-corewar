@@ -6,14 +6,11 @@
 #include "x16.h"
 
 extern Cell arena[CORESIZE];
-extern System corewar_system;
+extern unsigned char corewar_system_status;
 
 #define     INST        arena[ip]
 
-//Cell            operandData;
-int             ip, ipNext; //, source, destination, final;
-//int             tempInt;
-
+int             ip,     ipNext; 
 Cell            SRA,    SRB;
 int             PCA,    PCB;
 int             AValue, BValue;
@@ -90,16 +87,6 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
     ip = address; // do this first
     x16_arena_touch(ip, owner);
 
-/*
-    operandData.opcode = 0;
-    operandData.aMode = 0;
-    operandData.bMode = 0;
-    operandData.A = 0;
-    operandData.B = 0;
-*/
-    //x16_printCell(&INST, "\r\n");
-    //printf("   warrior %u, pid %u\n", owner, pid);
-
     getOperandAData();
     getOperandBData();
 
@@ -123,11 +110,11 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
         //  ADD and SUB work
         //
         case SUB: 
-            ++corewar_system.status;
+            ++corewar_system_status;
             AValue = -AValue;
             // fall thru
         case ADD:
-            ++corewar_system.status;
+            ++corewar_system_status;
             x16_arena_touch(PCB, owner);
             arena[PCB].B = (AValue + BValue + CORESIZE) % CORESIZE;
             if (INST.aMode != IMMEDIATE)
@@ -153,7 +140,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             break;
 
         case FLP: // Jump to location A if B > status word.
-            if ( (BValue > corewar_system.status) ) ipNext = PCA;
+            if ( (BValue > corewar_system_status) ) ipNext = PCA;
             break;
 
         case DJN:
@@ -164,22 +151,22 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             break;
 
         case SEQ: // IP++ if A == B     fall-through
-            ++corewar_system.status;
+            ++corewar_system_status;
             if (AValue == BValue) ++ipNext;
             break;
 
         case SNE: // IP++ if A != B     fall-through
-            ++corewar_system.status;
+            ++corewar_system_status;
             if (AValue != BValue) ++ipNext;
             break;
 
         case SLT: // IP++ if A  < B
-            ++corewar_system.status;
+            ++corewar_system_status;
             if (AValue < BValue) ++ipNext;
             break;
 
         case SPL: // SPLIT!
-            corewar_system.status += 3;
+            corewar_system_status += 3;
             process_add(owner, PCA);
             break;
 
@@ -190,7 +177,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
         case XCH: 
             x16_arena_touch(PCA, owner);
             x16_arena_touch(PCB, owner);
-            corewar_system.status += 3;
+            corewar_system_status += 3;
             tempMode    = SRA.aMode;
             SRA.aMode   = SRA.bMode;
             SRA.bMode   = tempMode;
@@ -203,7 +190,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             break;
 
         case HCF:
-            corewar_system.status += 3;
+            corewar_system_status += 3;
             // fall thru
         default:
             process_remove(owner, pid);
