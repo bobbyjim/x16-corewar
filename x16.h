@@ -5,6 +5,8 @@
 
 void x16_init();
 void x16_help();
+void x16_opcode_help();
+
 void x16_prompt(int ip);
 void x16_top();
 void x16_clrscr();

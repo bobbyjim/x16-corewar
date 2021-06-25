@@ -108,6 +108,17 @@ puts("--------------------------------------------------------------------------
 #endif
 }
 
+void x16_opcode_help()
+{
+#ifdef X16
+    textcolor(GREEN);
+    x16_show_banked_message(0xb000 + 1600);
+    textcolor(DEFAULT_COLOR);
+#else
+
+#endif
+}
+
 void x16_prompt(int ip)
 {
 #ifdef X16

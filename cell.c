@@ -9,7 +9,6 @@
 #include "common.h"
 #include "x16.h"
 
-
 #define     MAX_WARRIOR_LINES       256
 
 char* opcodes[16] = {
@@ -38,11 +37,22 @@ Cell* getTempCell() { return &tempCell; }
 unsigned char encode(char *opcode)
 {
     unsigned char x = 16;
+
+    //
+    // the opcode might be "lowercase"
+    //
+    printf("opcode 1: [%s]\r\n", opcode);
+    opcode[0] &= 0b01011111; // 95
+    opcode[1] &= 0b01011111; // 95
+    opcode[2] &= 0b01011111; // 95
+    printf("opcode 2: [%s]\r\n", opcode);
+
     while(--x)
-       if (!strcasecmp(opcode, opcodes[x])) 
+       if (!strcmp(opcode, opcodes[x])) 
            return x;
 
     if EQ(opcode, "cmp") return SEQ;
+    if EQ(opcode, "dat") return HCF;
 
     return INVALID_OPCODE;
 }

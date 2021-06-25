@@ -39,6 +39,10 @@ void repl()
       {
         x16_help();
       }
+      if (! strcmp(lineInputBuffer,"opcodes"))
+      {
+          x16_opcode_help();
+      }
       else if (sscanf(lineInputBuffer, "new %u", &warrior) == 1)
       {
           process_add(warrior,ip);
@@ -76,14 +80,14 @@ void repl()
           epoch = 0;
           warriorCount = process_runCorewar();
           origWarriorCount = warriorCount;
-          for(epoch = 0; epoch < 2000; ++epoch)
+          for(epoch = 0; epoch < 10000; ++epoch)
           {
               curWarriorCount = process_runCorewar();
               if ( curWarriorCount != warriorCount )
               {
-                  epoch = 0;
+                  //epoch = 0;
                   if (curWarriorCount == 0) // a recent change!
-                    epoch = 2000; // done
+                    epoch = 10000; // done
 //                  printf("**** warriors remaining: %u\n", curWarriorCount);
               }
               else if (epoch > 0 && epoch % 100 == 0)

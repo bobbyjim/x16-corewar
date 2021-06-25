@@ -1,5 +1,6 @@
-;
-;  MAD BOMBER  
+;;
+;  name: mad bomber 
+;  source: rje 
 ;           
     MOV 3 @2       
     ADD #17 1       

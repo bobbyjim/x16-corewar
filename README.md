@@ -1,56 +1,48 @@
 # x16-corewar - a Corewar VM
 
+# What is a core war?
+
  ref: https://corewar.co.uk/standards/cwg.txt - 1984
 
  ref: https://corewar.co.uk/madtutor.txt - 1986 and 1988
 
-# Build the Commander X16 binary
+# Compatability Rating X
 
-1. On the command, line, type:
+This implementation is an extension of the original Core War rules from 1984. The references below use the terms 84: (original spec), 86: (ICWS'86),
+88: (ICWS'88), 94: (ICWS'94 draft), and X: (variant feature).
 
-make clean
+## Opcodes
 
-2. Comment out "#define X16" in common.h
-3. Uncomment "#undef X16" in common.h
+* 88: DAT MOV ADD SUB JMP JMZ JMN DJN CMP SPL SLT
 
-4. Then, on the command line:
+* 94: SEQ
 
-make
+* X: HCL XCH
 
-# Build the "CC" binary 
+### Operands
 
-1. On the command line, type:
+* 84: Labels are not supported.  
 
-make clean
+* 84: Operand expressions are not supported.
 
-2. Comment out "#undef X16" in common.h
-3. Uncomment "#define X16" in common.h
+* 86: There is no "indirect predecrement".  On purpose.
 
-4. Then, on the command line:
+* X: All addressing modes are valid for all opcodes.
 
-make -f Makefile.cc
+* X: All opcodes MUST have both operands specified.
 
-# THE MEMORY CELL
+# VM-specific Behavior
 
-The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
+This core implementation is engineered with the following environment:
 
-    opcode:     4 bits
-    a-mode:     2 bits
-    b-mode:     2 bits
-    a operand: 12 bits
-    b operand: 12 bits
+* Up to 8 warriors may run at a time.
 
-CC65 optimizes structures that are power-of-two sizes, so 4 bytes is the 
-golden size.  If I increased the size for whatever reason, I'd probably
-want to go straight up to 8 bytes and put the arena in banked RAM.  However,
-that would take a performance hit, so I'd also want to put some logic up
-in assembly language.  In other words, the whole effort would be a major
-update requiring a lot of effort.
+* SPL supports up to 8 processes per warrior.
 
-The operand size (signed 12 bits) limits the memory window size to 4096 cells. 
-I think that's okay.  The arena/core is a bit short of 4K cells in size.
 
-# ARCHITECTURE
+
+
+# Arena Architecture
 
 The ARENA or CORE is the memory area; it represents a chunk of contiguous memory cells.
 This memory area is circular (i.e. it wraps around), so that there is no absolute position 
@@ -73,44 +65,55 @@ CORE is typically initialized to DAT 0, 0.  However, it might instead be initial
 
 I prefer to set CORE as a prime number, to confound trivial bombing programs a bit.
 
-# OPCODES
+# Redcode file notes
 
-    (0)  HCL   B   ; Remove process from the process queue.  The mnemonic comes from the 1970s "Halt and Catch Fire" joke opcode.
+* START EVERY FILE WITH THREE SEMICOLONS (';;;')!!
 
-    (1)  MOV A B   ; Move A into location B.
+The Commander X16 literally throws away the first two bytes of any file it reads in; Therefore, I strongly suggest you begin every redcode file with three semicolons -- by the way, this is a great place to hold the name of the warrior.  I may check for that name in the future.
+
+Otherwise, refer to the URL references for general instructions.
+
+# Opcodes
+
+     DAT   B   ; Remove process from the process queue.  
+
+     HCL   B   ; Same as DAT. Comes from the 1970s "Halt and Catch Fire" joke opcode.
+
+     MOV A B   ; Move A into location B.
     
-    (2)  ADD A B   ; B += A
+     ADD A B   ; B += A
 
-    (3)  SUB A B   ; B -= A 
+     SUB A B   ; B -= A 
         
-    (4)  JMP   B   ; Jump to location B.
+     JMP   B   ; Jump to location B.
     
-    (5)  JMN A B   ; Jump to location B if A != 0.
+     JMN A B   ; Jump to location B if A != 0.
     
-    (6)  JMZ A B   ; Jump to location B if A == 0.
+     JMZ A B   ; Jump to location B if A == 0.
         
-    (7)  SEQ A B   ; Skip next instruction if A == B.
+     CMP A B   ; Skip next instruction if A == B.
+
+     SEQ A B   ; Same as CMP.
+
+     SLT A B   ; Skip next instruction if A < B.
+
+     SNE A B   ; Skip next instruction if A != B.
+
+     FLP A B   ; Jump to location B if system word < A.
+
+     DJN A B   ; Decrement B, and then jump to A if B > 0.
+
+     XCH   B   ; Exchange operands at location A.
+
+     SPL A     ; Add A to the process queue.
     
-    (8)  SLT A B   ; Skip next instruction if A < B.
+Even though there are 16 opcodes, two are aliases, so in reality there are only 14 slots used.  This means there are still two unused opcode slots.  Suggestions welcome.
 
-    (9)  SNE A B   ; Skip next instruction if A != B.
-
-    (10) FLP A B   ; Jump to location B if system word < A.
-
-    (11) DJN A B   ; Decrement B, and then jump to A if B > 0.
-
-    (12) - (13)    ; reserved
-
-    (14) XCH   B   ; Exchange operands at location A.
-
-    (15) SPL A     ; Add A to the process queue.
-    
 I really didn't want DJN in the opcode inventory.  I felt it is responsible
 for making Imps too easy.  In the end though there is SO MUCH history around
 this opcode that I decided to leave it in.
 
-SLT and SNE, however, may or may not be useful.  I suspect one of them is 
-useful and the other one not.
+SLT and SNE may be useful.  I suspect one of them is useful and the other one not.
 
 FLP is completely silly.  I may remove it.
 
@@ -156,5 +159,48 @@ Gone, good bye, good riddance.
     ADD #5   1	; add 5 to the number stored at the next address.
     JMP -2	#5	; jump back to the MOV
 
+# THE MEMORY CELL
 
+The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
 
+    opcode:     4 bits
+    a-mode:     2 bits
+    b-mode:     2 bits
+    a operand: 12 bits
+    b operand: 12 bits
+
+CC65 optimizes structures that are power-of-two sizes, so 4 bytes is the 
+golden size.  If I increased the size for whatever reason, I'd probably
+want to go straight up to 8 bytes and put the arena in banked RAM.  However,
+that would take a performance hit, so I'd also want to put some logic up
+in assembly language.  In other words, the whole effort would be a major
+update requiring a lot of effort.
+
+The operand size (signed 12 bits) limits the memory window size to 4096 cells. 
+I think that's okay.  The arena/core is a bit short of 4K cells in size.
+
+# Build the Commander X16 binary
+
+1. On the command, line, type:
+
+make clean
+
+2. Comment out "#define X16" in common.h
+3. Uncomment "#undef X16" in common.h
+
+4. Then, on the command line:
+
+make
+
+# Build the "CC" binary 
+
+1. On the command line, type:
+
+make clean
+
+2. Comment out "#undef X16" in common.h
+3. Uncomment "#define X16" in common.h
+
+4. Then, on the command line:
+
+make -f Makefile.cc
