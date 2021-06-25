@@ -37,6 +37,9 @@ typedef unsigned int  word;
 
 #define     EQ(a,b)         (!strcmp(a,b))
 
+#define     CIRCLE_FILLED   209
+#define     CIRCLE_EMPTY    215
+
 void setVerbosity(unsigned char v);
 void bumpVerbosity();
 unsigned char isVerbose();

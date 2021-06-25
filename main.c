@@ -12,7 +12,7 @@
 char lineInputBuffer[80];
 unsigned int epoch;
 char filename[80];
-unsigned char warriorCount, curWarriorCount;
+unsigned char warriorCount, origWarriorCount, curWarriorCount, lastWarrior;
 unsigned int warrior = 0;
 
 int readLine()
@@ -75,14 +75,15 @@ void repl()
           x16_arena_draw();
           epoch = 0;
           warriorCount = process_runCorewar();
-          for(epoch = 0; epoch < 10000; ++epoch)
+          origWarriorCount = warriorCount;
+          for(epoch = 0; epoch < 2000; ++epoch)
           {
               curWarriorCount = process_runCorewar();
               if ( curWarriorCount != warriorCount )
               {
                   epoch = 0;
                   if (curWarriorCount == 0) // a recent change!
-                    epoch = 10000; // done
+                    epoch = 2000; // done
 //                  printf("**** warriors remaining: %u\n", curWarriorCount);
               }
               else if (epoch > 0 && epoch % 100 == 0)
@@ -93,8 +94,11 @@ void repl()
               //process_dump();
           }
           x16_top();
+          lastWarrior = process_lastWarrior();
           if (warriorCount == 1)
-             printf("winner!\n");
+             printf("winner: warrior no. %u!\n", lastWarrior);
+          else if (origWarriorCount == 1)
+             printf("suicide!\n");
           else
              printf("stalemate!\n");
 

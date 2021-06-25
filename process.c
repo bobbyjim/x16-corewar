@@ -14,6 +14,7 @@
 
 int process[WARRIORS_MAX][WARRIOR_PROCESSES_MAX];
 int currentProcess[WARRIORS_MAX];
+unsigned char x, y;
 
 void process_init()
 {
@@ -62,7 +63,6 @@ void process_remove(unsigned char owner, unsigned char pid)
 
 void process_dump()
 {
-    int x, y;
     int count = 0;
 
     for(x=0; x<WARRIORS_MAX; ++x)
@@ -75,6 +75,28 @@ void process_dump()
              printf("%2d: warrior no. %d, process %d: [%u]\n", ++count, x, y, process[x][y]);
 #endif
           }     
+}
+
+unsigned char process_lastWarrior()
+{
+    unsigned char lastWarrior = WARRIOR_INVALID;
+
+    for(x=0; x<WARRIORS_MAX; ++x)
+       for(y=0; y<WARRIOR_PROCESSES_MAX; ++y)
+          if (process[x][y] > -1)
+          {
+              if (lastWarrior == WARRIOR_INVALID)
+              {
+                lastWarrior = x; // owner number
+                break; // exit inner (process) loop
+              }
+              else // uh oh, there's two alive
+              {
+                  return WARRIOR_INVALID;
+              }
+          }
+
+    return lastWarrior;
 }
 
 //

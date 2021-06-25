@@ -233,14 +233,14 @@ void x16_arena_draw()
    gotoxy(1,6);
    for(pos=0; pos<CORESIZE; ++pos)
    {
-      cputc(arena_getCellChar(pos));
+      cputc('.'); //arena_getCellChar(pos));
       if (pos % 78 == 77) cputs("\r\n ");
    }
 #else
     printf(" ");
     for(pos=0; pos<CORESIZE; ++pos)
     {
-       printf("%c", arena_getCellChar(pos));
+       printf("%c", '.'); // arena_getCellChar(pos));
        if (pos % 78 == 77) printf("\n ");
     }    
 #endif
@@ -262,8 +262,8 @@ void x16_arena_touch(int ip, unsigned char owner)
     unsigned char x = ip % 78;
 
 #ifdef X16
-   textcolor(owner+1);
-   cputcxy(x, 6+y, (char)172);
+   textcolor(owner+2);
+   cputcxy(1+x, 6+y, CIRCLE_FILLED);
    textcolor(DEFAULT_COLOR);
 #else
     printf("%u:%u %s", owner, pid, opcode);

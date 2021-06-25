@@ -213,5 +213,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
     if (ipNext >= CORESIZE) 
         ipNext -= CORESIZE; // cheaper than a mod
 
+    x16_arena_touch(ipNext, -2);
+
     return ipNext; // updated ip
 }
