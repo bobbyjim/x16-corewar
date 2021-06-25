@@ -152,6 +152,12 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
             if ( (BValue > corewar_system.status) ) ipNext = PCA;
             break;
 
+        case DJN:
+            arena[PCB].B = (arena[PCB].B + CORESIZE - 1) % CORESIZE;
+            if (BValue != 1)     // ((BValue-1) != 0) 
+               ipNext = PCA;
+            break;
+
         case SEQ: // IP++ if A == B     fall-through
             ++corewar_system.status;
             if (AValue == BValue) ++ipNext;

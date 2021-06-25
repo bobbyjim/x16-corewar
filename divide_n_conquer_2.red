@@ -12,7 +12,6 @@
 start    MOV   #trap-source,        source   ; Init copy pointer
          MOV   #2432+source-trap,   target   ; Init destination pointer
 copy     MOV   @source,             <target  ; Copy warrior
-         SUB   
          DJN   copy,                source
          SPL   @target                       ; Start copy of warrior
 

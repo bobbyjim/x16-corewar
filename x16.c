@@ -108,7 +108,7 @@ puts("--------------------------------------------------------------------------
 #endif
 }
 
-void x16_prompt(ip)
+void x16_prompt(int ip)
 {
 #ifdef X16
     cprintf("\r\ncoreshell %u bytes free [%u] ", _heapmemavail(), ip);

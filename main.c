@@ -9,13 +9,11 @@
 #include "vm.h"
 #include "process.h"
 
-//extern unsigned char totalTests, testsPassed;
 char lineInputBuffer[80];
 unsigned int epoch;
 char filename[80];
 unsigned char warriorCount, curWarriorCount;
 unsigned int warrior = 0;
-int ip = 100;
 
 int readLine()
 {
@@ -29,6 +27,8 @@ int readLine()
 
 void repl()
 {
+    int ip = 100;
+
    x16_puts("coreshell 1.0\r\n");
    x16_help();
 
@@ -124,4 +124,5 @@ int main()
     process_init();
     setVerbosity(2);
     repl();
+    return 0;
 }

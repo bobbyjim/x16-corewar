@@ -49,7 +49,7 @@ that option.
 				Significant because CMP was the only Skip instruction
 				until 1994.
 
-	DJN: 638	notorious for its tight cheap looping
+	DJN: 638	enables tight looping
 
 	SUB: 237    This would be more valuable if DJN went away.
 	SNE: 169	I think this is more useful than CMP/SEQ
@@ -75,7 +75,7 @@ that option.
 #define			SLT				8
 #define			SNE				9
 #define			FLP				10
-//#define							11
+#define			DJN				11
 //#define							12
 //#define							13
 #define			XCH				14
