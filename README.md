@@ -40,7 +40,15 @@ The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
     a operand: 12 bits
     b operand: 12 bits
 
-The operand size (signed 12 bits) limits the max core size to 4096 cells. 
+CC65 optimizes structures that are power-of-two sizes, so 4 bytes is the 
+golden size.  If I increased the size for whatever reason, I'd probably
+want to go straight up to 8 bytes and put the arena in banked RAM.  However,
+that would take a performance hit, so I'd also want to put some logic up
+in assembly language.  In other words, the whole effort would be a major
+update requiring a lot of effort.
+
+The operand size (signed 12 bits) limits the memory window size to 4096 cells. 
+I think that's okay.  The arena/core is a bit short of 4K cells in size.
 
 # ARCHITECTURE
 
@@ -62,6 +70,8 @@ memory manipulations are in the ARENA.
 All address arithmetic is done modulo the size of the ARENA.
 
 CORE is typically initialized to DAT 0, 0.  However, it might instead be initialized to DAT #nnn, #nnn, where nnn is a number from 0 to 255.
+
+I prefer to set CORE as a prime number, to confound trivial bombing programs a bit.
 
 # OPCODES
 
@@ -87,12 +97,30 @@ CORE is typically initialized to DAT 0, 0.  However, it might instead be initial
 
     (10) FLP A B   ; Jump to location B if system word < A.
 
-    (11) - (13)    ; reserved
+    (11) DJN A B   ; Decrement B, and then jump to A if B > 0.
+
+    (12) - (13)    ; reserved
 
     (14) XCH   B   ; Exchange operands at location A.
 
     (15) SPL A     ; Add A to the process queue.
     
+I really didn't want DJN in the opcode inventory.  I felt it is responsible
+for making Imps too easy.  In the end though there is SO MUCH history around
+this opcode that I decided to leave it in.
+
+SLT and SNE, however, may or may not be useful.  I suspect one of them is 
+useful and the other one not.
+
+FLP is completely silly.  I may remove it.
+
+XCH was desired for at least three decades.
+
+SPL, I think, is another mischief maker opcode.  I've implemented it in a way
+that is kind of abusable: the process runs the next time its owner gets a time 
+slice.  On the other hand, a warrior can only have eight running processes, so
+I think that limitation helps blunt the power of SPL.
+
 ## Modes
 
 Addressing modes are identified by sigils:
@@ -116,21 +144,17 @@ rent instruction and retrieves the number stored at the specified lo-
 cation; this number is then interpreted as  an offset  from its own
 address. The number found  at this second location is the operand.
 
+### Indirect predecrement
 
+I totally jettisoned it.  This one is too powerful and encourages
+excessively short IMP-like programs that have no brain whatsoever.
+Gone, good bye, good riddance.
 
 # Example
 
-    DAT -1
-    ADD #5, -1	; add 5 to the number stored at the previous address.
-    MOV #0, @-2	; move the number 0 to the address pointed to at address [-2].
-    JMP -2		; jump back to the ADD
+    MOV  3  @2	; move the instruction 3 cells down to the address pointed to at address [+2].
+    ADD #5   1	; add 5 to the number stored at the next address.
+    JMP -2	#5	; jump back to the MOV
 
-The DAT statement serves to hold a value that will be used by the program
-(in this case, -1) at the first address. The ADD statement adds 5 to the number
-stored at the previous address, changing the -1 to a +4.  The MOV command moves
-the number 0 into the memory cell referred to by @-2. Where is that?  The address
-is found by referring to the DAT statement two lines in front of the MOV.
-There one find the address where the program will put the number 0. The final
-command, JMP, causes execution to jump back two lines, to the ADD command.
 
 
