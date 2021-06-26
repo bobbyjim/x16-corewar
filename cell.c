@@ -6,6 +6,7 @@
 
 #include "cell.h"
 #include "arena.h"
+#include "bank.h"
 #include "common.h"
 #include "x16.h"
 
@@ -102,8 +103,7 @@ void loadProgramFromFile(char *name, unsigned int location)
 
     unsigned int address = 0xa000;
 
-    POKE(0x9f61, 1); // bank 1 r38-
-    POKE(0x0000, 1); // bank 1 r39+
+    setBank(1);
 
     cprintf("loading at %u\r\n", location);
 

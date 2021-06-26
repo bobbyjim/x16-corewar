@@ -3,10 +3,15 @@
 
 #include "common.h"
 #include "cell.h"
+#include "bank.h"
 
-#define  RAW_CELL(i)                arena[i % CORESIZE]   
-#define  SET_CELL_B_VALUE(i,val)    arena[i % CORESIZE].B = val
-#define  SET_CELL_B_MODE(i,mode)    arena[i % CORESIZE].bMode = mode
+#define     SET_BANK(pos)          POKE 0x9f61, 10 + int(pos/CELLS_PER_BANK)
+#define     BANKED_CORE_MEMORY(n)  ((Cell *)0xA000)[n % CELLS_PER_BANK];
+//
+//  cc65 prefers we access this with array notation, like so:
+//
+//      BANKED_CORE_MEMORY[400];
+//
 
 void arena_init(unsigned char doRandomize);
 

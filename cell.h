@@ -2,11 +2,14 @@
 #define _CELL_H_
 
 typedef struct {
-	unsigned char opcode: 4;
+	unsigned char opcode: 8;
+	unsigned char flag2 : 8;
+	unsigned char flag3 : 8;
+	unsigned char flag4 : 8;
 	unsigned char aMode : 2;
+	unsigned int A  	: 14; 
 	unsigned char bMode : 2;
-	unsigned int A  	: 12; 
-	unsigned int B  	: 12; 
+	unsigned int B  	: 14; 
 } Cell;
 
 /*

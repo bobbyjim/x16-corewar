@@ -2,12 +2,12 @@
 
 #include "common.h"
 #include "arena.h"
+#include "bank.h"
 #include "cell.h"
 
-#define  OPCODE(pos) (arena[pos % CORESIZE].opcode)
-
-Cell arena[CORESIZE];
+//Cell arena[CORESIZE];
 unsigned char corewar_system_status;
+Cell* tmp;
 
 char cellChar[16] = {
    '.',     // hcf
@@ -42,12 +42,13 @@ void arena_clearLocation(int position, unsigned char doRandomize)
    //     rand() % 256, or
    //     65 + rand() % 26
 
-    Cell *tgt = &arena[ position % CORESIZE ];
-   tgt->opcode = HCF;
-   tgt->aMode  = 0;
-   tgt->A      = doRandomize? rand() : 0;
-   tgt->bMode  = 0;
-   tgt->B      = doRandomize? rand() : 0;
+   setCoreBank(position);
+   tmp = &BANKED_CORE_MEMORY(position); // &arena[ position % CORESIZE ];
+   tmp->opcode = HCF;
+   tmp->aMode  = 0;
+   tmp->A      = doRandomize? rand() : 0;
+   tmp->bMode  = 0;
+   tmp->B      = doRandomize? rand() : 0;
 }
 
 void arena_init(unsigned char doRandomize)
@@ -59,12 +60,12 @@ void arena_init(unsigned char doRandomize)
 
 Cell* arena_getLocation(int position)
 {
-   return &arena[ position % CORESIZE];
+   return &BANKED_CORE_MEMORY(position); //&arena[ position % CORESIZE];
 }
 
 void arena_setLocation(int position, Cell *copy)
 {
-   Cell *tgt = &arena[ position % CORESIZE ];
+   Cell *tgt = &BANKED_CORE_MEMORY(position); //&arena[ position % CORESIZE ];
    tgt->opcode = copy->opcode;
    tgt->aMode  = copy->aMode;
    tgt->A      = copy->A;

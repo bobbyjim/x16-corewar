@@ -18,6 +18,7 @@
 
 #include "x16.h"
 #include "cell.h"
+#include "bank.h"
 #include "arena.h"
 
 extern unsigned char corewar_system_status;
@@ -25,9 +26,11 @@ extern unsigned char corewar_system_status;
 unsigned char x16_stepMode = 0;
 
 #ifdef  X16
-void x16_show_banked_message(unsigned int index)
+void x16_show_banked_message(unsigned int bank, unsigned int index)
 {
     unsigned int x;
+
+    setBank(bank);
 
     for (x=index; x<index+800; ++x)
        if (PEEK(x) == 0)
@@ -54,7 +57,7 @@ void x16_init()
 
    gotoxy(0,20);
 
-   x16_show_banked_message(0xb000);
+   x16_show_banked_message(1, 0xb000);
 
    textcolor(DEFAULT_COLOR);
    gotoxy(0,40);
@@ -86,7 +89,7 @@ void x16_help()
 {
 #ifdef X16
    textcolor(GREEN);
-   x16_show_banked_message(0xb000 + 800);
+   x16_show_banked_message(1, 0xb000 + 800);
    textcolor(DEFAULT_COLOR);
 #else
 puts("-------------------------- CORESHELL COMMANDS --------------------------------");
@@ -113,7 +116,7 @@ void x16_opcode_help()
 {
 #ifdef X16
     textcolor(GREEN);
-    x16_show_banked_message(0xb000 + 1600);
+    x16_show_banked_message(1, 0xb000 + 1600);
     textcolor(DEFAULT_COLOR);
 #else
 

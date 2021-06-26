@@ -5,7 +5,7 @@
 #include "process.h"
 #include "x16.h"
 
-extern Cell arena[CORESIZE];
+//extern Cell arena[CORESIZE];
 extern unsigned char corewar_system_status;
 
 //#define     INST        arena[ip]
@@ -106,7 +106,7 @@ int vm_execute(unsigned char owner, unsigned char pid, int address)
         case ADD:
             ++corewar_system_status;
             x16_arena_touch(PCB, owner);
-            arena[PCB].B = (AValue + BValue + CORESIZE) % CORESIZE;
+            arena_getLocation(PCB)->B = (AValue + BValue + CORESIZE) % CORESIZE;
             if (inst->aMode != IMMEDIATE)
                 arena_getLocation(PCB)->A = (SRA->A + SRB->B) % CORESIZE; // arena[PCB].A = (SRA.A + SRB.A) % CORESIZE;
             break;
