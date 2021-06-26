@@ -18,7 +18,7 @@ void setBank(unsigned char bank)
 {
     if (currentBank = bank) return;
 
-    cprintf("bank -> %u\n", bank);
+    //cprintf("bank -> %u\n", bank);
     currentBank = bank;
     POKE(0x9f61, bank);  // r38-
     POKE(0, bank);       // r39+
@@ -30,7 +30,7 @@ void setCoreBank(int position)
 
     if (bank == currentBank) return;
 
-    cprintf("bank -> %u\n", bank);
+    //cprintf("bank -> %u\n", bank);
     currentBank = bank;
     POKE(0x9f61, currentBank); // r38-
     POKE(0, currentBank);      // r39+
