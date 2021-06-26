@@ -19,7 +19,7 @@
     * we'd move the arena into 8 RAM banks, 1000 locations per bank.
 
  */
-#define     CORESIZE                7919
+#define     CORESIZE                8893
 #define     INVALID_LOCATION        30000
 
 #define     MAX_WARRIOR_LINES       256

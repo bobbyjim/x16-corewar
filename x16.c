@@ -24,6 +24,8 @@
 extern unsigned char corewar_system_status;
 
 unsigned char x16_stepMode = 0;
+unsigned char arena_square[2] = { SQUARE_SW, SQUARE_SE };
+
 
 #ifdef  X16
 void x16_show_banked_message(unsigned int bank, unsigned int index)
@@ -209,12 +211,11 @@ void x16_arena_draw()
    unsigned char x;
 
 #ifdef X16
-   gotoxy(1,6);
    for(pos=0; pos<CORESIZE; ++pos)
    {
-       y = pos / 156;
-       x = pos % 156;
-       cputcxy(1+x,6+y,'.');
+       y = pos / 160;
+       x = pos % 160;
+       cputcxy(x,3+y,'.');
    }
 #else
     printf(" ");
@@ -226,6 +227,22 @@ void x16_arena_draw()
 #endif
 }
 
+void x16_arena_touch(int ip, unsigned char owner)
+{
+    unsigned char y = ip / 160;
+    unsigned char x = ip % 160;
+
+    if (x16_stepMode > 0) return;
+
+#ifdef X16
+   textcolor(owner+2);
+   cputcxy(x, 3+y, arena_square[ip%2]); // was: CIRCLE_FILLED
+   textcolor(DEFAULT_COLOR);
+#else
+    printf("%u @ %u\n\n", owner, ip);
+#endif
+}
+
 void x16_arena_ps(unsigned char owner, unsigned char pid, char *opcode)
 {
 #ifdef X16
@@ -233,25 +250,6 @@ void x16_arena_ps(unsigned char owner, unsigned char pid, char *opcode)
    cputs(opcode);
 #else
     printf("%u:%u %s", owner, pid, opcode);
-#endif
-}
-
-void x16_arena_touch(int ip, unsigned char owner)
-{
-    unsigned char y = ip / 156;
-    unsigned char x = ip % 156;
-    unsigned char c = ip % 2;
-
-    if (x16_stepMode > 0) return;
-
-    c = c==0? SQUARE_SW : SQUARE_SE;
-
-#ifdef X16
-   textcolor(owner+2);
-   cputcxy(1+x, 6+y, c); // was: CIRCLE_FILLED
-   textcolor(DEFAULT_COLOR);
-#else
-    printf("%u @ %u\n\n", owner, ip);
 #endif
 }
 
