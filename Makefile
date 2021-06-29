@@ -5,7 +5,7 @@ PROGRAM = COREWAR
 CC65_TARGET = cx16
 
 CC	= cl65 
-CFLAGS 	= --cpu 65c02 -t $(CC65_TARGET) --create-dep $(<:.c=.d) -Ors 
+CFLAGS 	= --cpu 65c02 -t $(CC65_TARGET) --create-dep $(<:.c=.d) -Ors -DX16
 LDFLAGS	= -t $(CC65_TARGET) -m $(PROGRAM).map
 OBJDIR  = .obj
 

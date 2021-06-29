@@ -1,5 +1,7 @@
-#include <conio.h>
+#ifdef X16
 #include <peekpoke.h>
+#include <conio.h>
+#endif
 
 #include "bank.h"
 
@@ -8,20 +10,21 @@ unsigned char currentBank;
 void switchToHelpBank()
 {
     if (currentBank == 1) return;
-
     currentBank = 1;
+#ifdef X16
     POKE(0x9f61, 1); // r38-
     POKE(0, 1);      // r39+
+#endif
 }
 
 void setBank(unsigned char bank)
 {
-    if (currentBank = bank) return;
-
-    //cprintf("bank -> %u\n", bank);
+    if (currentBank == bank) return;
     currentBank = bank;
+#ifdef X16
     POKE(0x9f61, bank);  // r38-
     POKE(0, bank);       // r39+
+#endif
 }
 
 void setCoreBank(int position)
@@ -30,8 +33,10 @@ void setCoreBank(int position)
 
     if (bank == currentBank) return;
 
-    //cprintf("bank -> %u\n", bank);
     currentBank = bank;
+
+#ifdef X16
     POKE(0x9f61, currentBank); // r38-
     POKE(0, currentBank);      // r39+
+#endif
 }

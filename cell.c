@@ -4,6 +4,11 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifdef X16
+#include    <conio.h>
+#include    <peekpoke.h>
+#endif
+
 #include "cell.h"
 #include "arena.h"
 #include "bank.h"
@@ -29,22 +34,30 @@ char* opcodes[16] = {
 	/* 15 */ "spl"  
 };
 
+/////////////////////////////////////////////////////////////////
+//
+//  It appears that we're blowing the call stack of the 65C02.
+//  So in an effort to sidestep nested calls, let's break this
+//  into two separate pieces:
+//
+//  First, see if we can build a list of parsed cells.
+//
+//  If we can do that, then we can load them in a loop.
+//  Maybe.
+//
+/////////////////////////////////////////////////////////////////
+Cell program[256]; // up to 256 parsed instructions
+unsigned char programSize;
+
+
+unsigned int location; // where the parsed instructions should go
+
 Cell tempCell;
-Cell* getTempCell() { return &tempCell; }
-unsigned char loadedOpcode;
-
-unsigned char encode(char *opcode)
-{
-    unsigned char x = 16;
-    while(--x)
-       if (!strcmp(opcode, opcodes[x])) 
-           return x;
-
-    if EQ(opcode, "cmp") return SEQ;
-    if EQ(opcode, "dat") return HCF;
-
-    return INVALID_OPCODE;
-}
+char buffer[LINE_BUFFER_SIZE];
+unsigned char buffer_position = 0;
+unsigned int bankAddress;
+unsigned char eoln = 0x0a;
+unsigned char eof = '\0';
 
 char modes[] = { 
         '#',    // value (0)
@@ -53,12 +66,158 @@ char modes[] = {
         '<'     // address indirect predecrement (3)
 };
 
-//
-//  Rather than support the hackneyed parser here, I should
-//  scrap all this and just support the "object" format.
-//  This would free up needed RAM.
-//
-void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
+void cell_loadFile(char *filename)
+{
+#ifdef X16
+    //
+    //  Load file into Bank 1
+    // 
+    setBank(1);
+    bankAddress = 0xa000;
+    memset( (unsigned char*) bankAddress, 0x00, 4096);
+    cprintf("loading %s\r\n", filename);
+    cbm_k_setnam(filename);
+    cbm_k_setlfs(IGNORE_LFN,EMULATOR_FILE_SYSTEM,SA_IGNORE_HEADER);
+    cbm_k_load(LOAD_FLAG, bankAddress);
+#else
+    FILE *fp = fopen(filename, "r");
+    int ok;
+
+    while (fgets(buffer, LINE_BUFFER_SIZE, fp) != NULL)
+       if (cell_load(buffer) != INVALID_OPCODE)
+       {
+          arena_setLocation(location, &tempCell);
+          location++;
+       }
+
+    fclose(fp);
+#endif
+}
+
+void cell_setLocation(unsigned int destination)
+{
+    location = destination;
+}
+
+#ifdef X16
+void eatBankWhitespace()
+{
+    while( PEEK(bankAddress) == ' ' 
+        || PEEK(bankAddress) == '\t' )
+        ++bankAddress;    
+}
+#endif
+
+#ifdef X16
+unsigned char readBankLine()
+{
+    // eat initial whitespace
+    eatBankWhitespace();
+
+    // reset buffer
+    memset(buffer, '\0', sizeof(buffer));
+    buffer_position = 0;
+
+    while(buffer_position < LINE_BUFFER_SIZE)
+    {
+       if (PEEK(bankAddress) == eof) // we are SO done
+          return eof;
+
+       if (PEEK(bankAddress) == eoln)  // line is ready?
+       {
+          ++bankAddress; // eat end of line
+          if (buffer_position > 0) // yeah, line is ready.
+            return eoln;
+       }
+
+       buffer[buffer_position] = PEEK(bankAddress);
+       
+       if (buffer[buffer_position] > 96) 
+          buffer[buffer_position] -= 32; // to PETSCII uppercase
+
+       ++bankAddress;
+       ++buffer_position;
+   }
+
+   if (buffer_position == LINE_BUFFER_SIZE) // eat rest of line
+      while((PEEK(bankAddress) != eoln) || (PEEK(bankAddress) != eof))
+         ++bankAddress;
+
+   return 1;
+}
+#endif
+
+void cell_copyProgramIntoCore()
+{
+    unsigned char x;
+    for(x=0; x<programSize; ++x)
+    {
+        arena_setLocation(location, &program[x]);
+        //cprintf("loaded cell into %u\r\n", location);
+        ++location;
+    }
+}
+
+void cell_storeInProgram()
+{
+    program[programSize].opcode = tempCell.opcode;
+    program[programSize].aMode  = tempCell.aMode;
+    program[programSize].A      = tempCell.A;
+    program[programSize].bMode  = tempCell.bMode;
+    program[programSize].B      = tempCell.B;
+    ++programSize;
+}
+
+void cell_parseBank()
+{
+#ifdef X16
+    bankAddress = 0xa000;
+    programSize = 0;
+    //
+    //  Break up into lines and serve.
+    //
+    while(readBankLine())
+    {
+       if (strlen(buffer) == 0) // ignore
+       {
+       }
+       else if (buffer[0] == ';') // this is just a comment
+       {
+          //cprintf("comment: %s\r\n", buffer);
+       }
+       else 
+       {
+          if (cell_load(buffer) != INVALID_OPCODE )
+             cell_storeInProgram();
+          else
+             cprintf("fail\r\n");
+       }
+    }
+#endif
+}
+
+unsigned char cell_encode_opcode(char *opcode)
+{
+    unsigned char x;
+
+#ifndef X16
+    opcode[0] |= 32;
+    opcode[1] |= 32;
+    opcode[2] |= 32;
+#endif
+
+    //printf("checking opcode [%s]\n", opcode);    
+    for(x=0; x<16; ++x)
+       if EQ(opcode, opcodes[x])
+           return x;
+
+    if (EQ(opcode, "cmp") || EQ(opcode, "CMP")) return SEQ;
+    if (EQ(opcode, "dat") || EQ(opcode, "DAT")) return HCF;
+
+    return INVALID_OPCODE;
+}
+
+void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
 {
    int rawValue;
    switch(*src)
@@ -73,11 +232,6 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
             ++src;
             break;
 
-//       case '<': 
-//            *mode = PREDECREMENT_INDIRECT;
-//            ++src;
-//            break;
-
        default:  
             *mode = DIRECT;
             break;
@@ -90,118 +244,40 @@ void decodeOperand(char *src, unsigned char *mode, unsigned int *val)
    *val = rawValue; 
 }
 
-void loadProgramFromFile(char *name, unsigned int location)
-{
-    char buffer[LINE_BUFFER_SIZE];
-
-#ifdef X16
-#include    <conio.h>
-#include    <peekpoke.h>
-
-    int line;
-    int x;
-
-    unsigned int address = 0xa000;
-
-    setBank(1);
-
-    cprintf("loading at %u\r\n", location);
-
-    cbm_k_setnam(name);
-    cbm_k_setlfs(IGNORE_LFN,EMULATOR_FILE_SYSTEM,SA_IGNORE_HEADER);
-    cbm_k_load(LOAD_FLAG, address);
-
-    for(line=0; line<MAX_WARRIOR_LINES; ++line)
-    {
-        // build up the buffer
-        for(x=0; x<LINE_BUFFER_SIZE; ++x)
-        {
-            buffer[x] = PEEK(address); 
-            if (buffer[x] > 96) buffer[x] -= 32;
-            ++address;
-            if (buffer[x] == 0x0a) // done
-            {
-                buffer[x] = '\0';
-                break; // out of the buffer loop
-            }
-        }
-        if (buffer[0] == ';') // this is just a comment
-        {
-            cputs(buffer);
-            cputs("\r\n");
-        }
-        else
-        if ( (strlen(buffer) > 0) && (loadCell(buffer, location) != INVALID_OPCODE) )
-           location++;
-    }
-#else
-    FILE *fp = fopen(name, "r");
-    int ok;
-    int i;
-
-    printf("loading at %u\n", location);
-    do
-    {
-        ok = 1;
-        if (fgets(buffer, LINE_BUFFER_SIZE, fp) != NULL)
-        {
-           if (loadCell(buffer, location) != INVALID_OPCODE)
-              location++;
-        }
-        else
-           ok = 0;
-    }
-    while(ok);
-    fclose(fp);
-#endif
-}
-
 /*
  
-    Return the loaded opcode
+    Load the instruction into *tempCell
 
  */
-unsigned char loadCell(char *input, int position)
-{
-    unsigned char value;
-    value = buildTempCell(input);
-
-    if (value != INVALID_OPCODE)
-        arena_setLocation(position, &tempCell);
-
-    return value;
-}
-
-unsigned char buildTempCell(char *input)
+unsigned char cell_load(char *input)
 {
     char opcode[3] = "";
     char a[8] = ""; 
     char b[8] = "";
-//    char* label;
+    unsigned char opcode_value;
 
     unsigned char amode = 0;
     unsigned char bmode = 0;
     unsigned int aval   = 0;
     unsigned int bval   = 0;
     
-//    if (sscanf(input, "%s %s %s %s", label, opcode, a, b) == 4)
-//        cprintf("label found: %s\r\n", label);
     if (sscanf(input, " %3s %s %s", opcode, a, b) != 3)
         return INVALID_OPCODE;
-
+    
     if (opcode[0] == ';') // comment!
         return INVALID_OPCODE;
 
-    decodeOperand(a, &amode, &aval);
-    decodeOperand(b, &bmode, &bval);
+    cell_decode_operand(a, &amode, &aval);
+    cell_decode_operand(b, &bmode, &bval);
 
-    tempCell.opcode  = encode(opcode);
+    opcode_value = cell_encode_opcode(opcode);
+    tempCell.opcode  = opcode_value;
     tempCell.aMode  = amode;
     tempCell.A      = aval;
     tempCell.bMode  = bmode;
     tempCell.B      = bval;
 
-    return tempCell.opcode;
+    return opcode_value;
 }
 
 char* getOpcodeName(Cell *cell)

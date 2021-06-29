@@ -12,6 +12,10 @@ void process_remove(unsigned char owner, unsigned char pid);
 void process_dump();
 
 unsigned char process_runCorewar();
+unsigned char process_countWarriors();
 unsigned char process_lastWarrior();
+unsigned char process_prepareNextToRun();
+void process_postExecute(int ip);
+unsigned char process_continue();
 
 #endif

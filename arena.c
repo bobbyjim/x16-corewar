@@ -1,3 +1,6 @@
+//#include <stdio.h>
+//#include "x16.h"
+
 #include <stdlib.h>
 
 #include "common.h"
@@ -5,7 +8,14 @@
 #include "bank.h"
 #include "cell.h"
 
-//Cell arena[CORESIZE];
+#ifndef X16
+/* 
+    For Unix, we don't have to fool around with banked memory.
+    So let's just grab a big hunk of static memory here as usual.
+ */
+Cell arena[CORESIZE];
+#endif
+
 unsigned char corewar_system_status;
 Cell* tmp;
 
@@ -43,7 +53,7 @@ void arena_clearLocation(int position, unsigned char doRandomize)
    //     65 + rand() % 26
 
    setCoreBank(position);
-   tmp = &BANKED_CORE_MEMORY(position); // &arena[ position % CORESIZE ];
+   tmp = &CORE_MEMORY(position); // &arena[ position % CORESIZE ];
    tmp->opcode = HCF;
    tmp->aMode  = 0;
    tmp->A      = doRandomize? rand() : 0;
@@ -60,12 +70,22 @@ void arena_init(unsigned char doRandomize)
 
 Cell* arena_getLocation(int position)
 {
-   return &BANKED_CORE_MEMORY(position); //&arena[ position % CORESIZE];
+   setCoreBank(position);
+   return &CORE_MEMORY(position); //&arena[ position % CORESIZE];
 }
 
-void arena_setLocation(int position, Cell *copy)
+/*
+     We need this due to banking.
+ */
+void arena_setData(int target, int source)
 {
-   Cell *tgt = &BANKED_CORE_MEMORY(position); //&arena[ position % CORESIZE ];
+   Cell *src = arena_getLocation(source);
+   arena_setLocation(target, src);
+}
+
+void arena_setLocation(int target, Cell *copy)
+{
+   Cell *tgt = arena_getLocation(target);   
    tgt->opcode = copy->opcode;
    tgt->aMode  = copy->aMode;
    tgt->A      = copy->A;

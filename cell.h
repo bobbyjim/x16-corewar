@@ -145,11 +145,14 @@ They absolutely do not convert easily to '88 standard.
 //#define			PREDECREMENT_INDIRECT		3
 
 
-void loadProgramFromFile(char *name, unsigned int location);
+void cell_setLocation(unsigned int destination);
+void cell_loadFile(char *filename);
+void cell_parseBank();
+void cell_storeInProgram();
+void cell_copyProgramIntoCore();
+
 void loadProgram(char *buffer[], unsigned char bufsiz, int startLocation);
-unsigned char loadCell(char *input, int location);
-unsigned char buildTempCell(char *input);
-Cell* getTempCell();
+unsigned char cell_load(char *input);
 char* getOpcodeName(Cell *cell);
 char  getMode(unsigned char mode);
 

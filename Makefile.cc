@@ -5,7 +5,7 @@ PROGRAM = COREWAR
 CC65_TARGET = cx16
 
 CC	= cc 
-CFLAGS 	= 
+CFLAGS 	= -DUNIX
 LDFLAGS	= 
 OBJDIR  = .obj
 

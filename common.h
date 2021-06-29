@@ -1,11 +1,13 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-/*--------------------------------------------
+/*----------------------------------------------------
 "#define X16" to compile for the Commander X16.
 "#undef X16" to compile for UNIX or whatever.
---------------------------------------------*/
-#define        X16
+
+Best to include it on the compile command with -DX16.
+-----------------------------------------------------*/
+//#define        X16
 //#undef         X16   
 
 /*
@@ -19,13 +21,13 @@
     * we'd move the arena into 8 RAM banks, 1000 locations per bank.
 
  */
-#define     CORESIZE                8893
+#define     CORESIZE                8000
 #define     INVALID_LOCATION        30000
 
 #define     MAX_WARRIOR_LINES       256
 #define     LINE_BUFFER_SIZE        80
 
-#define     MAXIMUM_EPOCHS          6000
+#define     MAXIMUM_EPOCHS          8000
 
 #define     LOGICAL_FILE_NUM        1
 #define     IGNORE_LFN              0
@@ -46,6 +48,7 @@ typedef unsigned int  word;
 #define     YELLOW  7
 #define     AMBER   8
 #define     LTRED   10
+#define     DKGREY  11
 #define     LTGREEN 13
 #define     LTBLUE  14
 #define     LTGREY  15

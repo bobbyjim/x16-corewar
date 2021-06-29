@@ -21,11 +21,13 @@
 #include "bank.h"
 #include "arena.h"
 
-extern unsigned char corewar_system_status;
+extern unsigned char corewar_system_status; // from arena.c
 
 unsigned char x16_stepMode = 0;
-unsigned char arena_square[2] = { SQUARE_SW, SQUARE_SE };
+unsigned char arena_square[2] = { SQUARE_SW, SQUARE_SE }; // , SQUARE_NW, SQUARE_NE };
 
+extern unsigned char currentBank; // from bank.c
+extern unsigned int epoch; // from process.c
 
 #ifdef  X16
 void x16_show_banked_message(unsigned int bank, unsigned int index)
@@ -61,9 +63,10 @@ void x16_init()
 
    x16_show_banked_message(1, 0xb000);
 
-   textcolor(DEFAULT_COLOR);
    gotoxy(0,40);
+   textcolor(LTRED);
    cputs("                    * * *   press a key to begin   * * *");
+   textcolor(DEFAULT_COLOR);
    cgetc();
    clrscr();
 
@@ -84,7 +87,6 @@ void x16_init()
 
    srand(time(0));
 #endif
-
 }
 
 void x16_help()
@@ -97,18 +99,18 @@ void x16_help()
 puts("-------------------------- CORESHELL COMMANDS --------------------------------");
 puts("");
 puts("cls: clear screen                       logout: quit program                  ");
-puts("reset: clear arena memory                         ");
+puts("reset: clear arena memory               step: run one epoch                   ");
 puts("run: run!                               d nnn: display arena from nnn         ");
 puts("help: show this text                    new n: add a process                  ");
 puts("");
-puts("hcf a b: halt-catch-fire                mov a b                           ");
+puts("hcf   b: halt-catch-fire                mov a b                               ");
 puts("add a b: b += a                         sub a b: b -= a   ");
 puts("");
-puts("jmp   b: jump to b                      jmn a b: jmp if a!=0");
-puts("jmz a b: jmp if a==0                    seq a b: ++ip if a==b");
+puts("jmp a  : jump to a                      jmn a b: jmp if b!=0");
+puts("jmz a b: jmp if b==0                    seq a b: ++ip if a==b");
 puts("slt a b: ++ip if a<b                    sne a b: ++ip if a!=b");
 puts("");
-puts("xch a b: exchange a,b at a              spl a b: split to b ");
+puts("xch a  : exchange a,b at a              spl a  : split to a ");
 puts("");
 puts("------------------------------------------------------------------------------");
 #endif
@@ -128,8 +130,8 @@ void x16_opcode_help()
 void x16_prompt(int ip)
 {
 #ifdef X16
-    //cprintf("\r\ncoreshell %u bytes free [%u] ", _heapmemavail(), ip);
-    cprintf("\r\ncoreshell [%u] ", ip);
+    cprintf("\r\ncoreshell %u [%u] ", _heapmemavail(), ip);
+    //cprintf("\r\ncoreshell [%u] ", ip);
 #else
     printf("\ncoreshell [%u] ", ip);
 #endif
@@ -147,6 +149,15 @@ void x16_clrscr()
 #ifdef X16
       clrscr();
       gotoxy(0,0);
+#endif
+}
+
+int x16_getc()
+{
+#ifdef X16
+    return cgetc();
+#else
+    return getc(stdin);
 #endif
 }
 
@@ -186,7 +197,7 @@ void x16_printCell(Cell *cell, char* postfix)
 #endif
 }
 
-void x16_putLine(char* s)
+void x16_msg(char* s)
 {
 #ifdef X16
     cprintf("%s\r\n", s);
@@ -194,6 +205,16 @@ void x16_putLine(char* s)
     printf("%s\n", s);
 #endif
 }
+
+void x16_msg2(char* a, char *b)
+{
+#ifdef X16
+    cprintf("%s %s\r\n", a, b);
+#else
+    printf("%s %s\n", a, b);
+#endif
+}
+
 
 void x16_putValue(char* label, unsigned int value)
 {
@@ -207,15 +228,18 @@ void x16_putValue(char* label, unsigned int value)
 void x16_arena_draw()
 {
    int pos;
+
+#ifdef X16
    unsigned char y;
    unsigned char x;
 
-#ifdef X16
+   cputsxy(70,0, "01234567e ");
+   textcolor(DKGREY);
    for(pos=0; pos<CORESIZE; ++pos)
    {
        y = pos / 160;
        x = pos % 160;
-       cputcxy(x,3+y,'.');
+       cputcxy(x,3+y,SQUARE_SW);
    }
 #else
     printf(" ");
@@ -238,8 +262,21 @@ void x16_arena_touch(int ip, unsigned char owner)
    textcolor(owner+2);
    cputcxy(x, 3+y, arena_square[ip%2]); // was: CIRCLE_FILLED
    textcolor(DEFAULT_COLOR);
+   if ( epoch % 250 == 0)
+   {
+      cputcxy(78,1, '0' + epoch*10/MAXIMUM_EPOCHS);
+      gotoxy(0,0);
+   }
+//   cputcxy(79,1, '0' + currentBank - 10);
 #else
     printf("%u @ %u\n\n", owner, ip);
+#endif
+}
+
+void x16_ps(unsigned char owner, char state)
+{
+#ifdef X16
+   cputcxy(70+owner,1, state);
 #endif
 }
 
