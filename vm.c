@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-#include <conio.h>
-
 #include "cell.h"
 #include "bank.h"
 #include "arena.h"

@@ -21,7 +21,7 @@ Best to include it on the compile command with -DX16.
     * we'd move the arena into 8 RAM banks, 1000 locations per bank.
 
  */
-#define     CORESIZE                8000
+#define     CORESIZE                8191
 #define     INVALID_LOCATION        30000
 
 #define     MAX_WARRIOR_LINES       256
