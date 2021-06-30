@@ -142,7 +142,7 @@ They absolutely do not convert easily to '88 standard.
 #define			IMMEDIATE					0
 #define			DIRECT						1
 #define			INDIRECT					2
-//#define			PREDECREMENT_INDIRECT		3
+#define			PREDECREMENT_INDIRECT		3
 
 
 void cell_setLocation(unsigned int destination);

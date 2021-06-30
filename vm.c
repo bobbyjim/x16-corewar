@@ -16,8 +16,10 @@ Cell           *inst_ptr;
 Cell            inst;
 int             ip,     ipNext; 
 int             PCA,    PCB;
+int             PCAI,   PCBI;
 Cell           *SRA,   *SRB;
 int             AValue, BValue, BAValue;
+int             tempValue;
 unsigned char   tempMode;
 unsigned char   tempOperand;
 
@@ -34,20 +36,31 @@ void getOperandAData()
 {
     switch(inst.aMode)
     {
-        case IMMEDIATE: // 
+        case IMMEDIATE:
             PCA = ip;
             AValue = inst.A;
             break;
 
-        case DIRECT: // 
+        case DIRECT:
             PCA = (ip + inst.A) % CORESIZE;
             AValue = arena_getLocation(PCA)->B;
             break;
 
-        case INDIRECT: // 
+        case INDIRECT:
             PCA = (ip + inst.A) % CORESIZE;
             SRA = arena_getLocation(PCA);
             PCA = (PCA + SRA->B) % CORESIZE;
+            AValue = arena_getLocation(PCA)->B;
+            break;
+
+        case PREDECREMENT_INDIRECT: // what a mess!
+            PCA = (ip + inst.A) % CORESIZE;
+            BValue = arena_getLocation(PCA)->B;
+            PCAI = PCA;
+            PCA  = (PCAI + CORESIZE - 1) % CORESIZE;
+            tempValue = arena_getLocation(PCAI)->B;
+            arena_getLocation(PCAI)->B = (tempValue + CORESIZE - 1) % CORESIZE;
+            PCA = (PCA + BValue) % CORESIZE;
             AValue = arena_getLocation(PCA)->B;
             break;
     }
@@ -70,6 +83,16 @@ void getOperandBData()
             PCB = (ip + inst.B) % CORESIZE;
             SRB = arena_getLocation(PCB);
             PCB = (PCB + SRB->B) % CORESIZE;
+            break;
+
+        case PREDECREMENT_INDIRECT:
+            PCB = (ip + inst.B) % CORESIZE;
+            BValue = arena_getLocation(PCB)->B;
+            PCBI = PCB;
+            PCB = (PCB + CORESIZE - 1) % CORESIZE;
+            tempValue = arena_getLocation(PCBI)->B;
+            arena_getLocation(PCBI)->B = (tempValue + CORESIZE - 1) % CORESIZE;
+            PCB = (PCB + BValue) % CORESIZE;
             break;
     }
     SRB = arena_getLocation(PCB);

@@ -232,6 +232,11 @@ void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
             ++src;
             break;
 
+       case '<':
+            *mode = PREDECREMENT_INDIRECT;
+            ++src;
+            break;
+            
        default:  
             *mode = DIRECT;
             break;
