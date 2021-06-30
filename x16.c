@@ -237,9 +237,9 @@ void x16_arena_draw()
    textcolor(DKGREY);
    for(pos=0; pos<CORESIZE; ++pos)
    {
-       y = pos / 160;
-       x = pos % 160;
-       cputcxy(x,3+y,SQUARE_SW);
+       y = pos / 80;
+       x = pos % 80;
+       cputcxy(x,3+y/2,SQUARE_SW);
    }
 #else
     printf(" ");
@@ -260,7 +260,14 @@ void x16_arena_touch(int ip, unsigned char owner)
 
 #ifdef X16
    textcolor(owner+2);
-   cputcxy(x, 3+y, arena_square[ip%2]); // was: CIRCLE_FILLED
+
+   //
+   //  y ranges from 0 to 50.
+   //  x ranges from 0 to 160.  
+   //
+   //  We need to "compress" x into 80 positions.
+   //
+   cputcxy(x/2, 3+y, arena_square[ip%2]); // was: CIRCLE_FILLED
    textcolor(DEFAULT_COLOR);
    if ( epoch % 250 == 0)
    {
