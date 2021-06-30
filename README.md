@@ -25,8 +25,6 @@ This implementation is an extension of the original Core War rules from 1984. Th
 
 * 84: Operand expressions are not supported.
 
-* 86: There is no "indirect predecrement".  On purpose.
-
 * X: All addressing modes are valid for all opcodes.
 
 * X: All opcodes MUST have both operands specified.
@@ -69,6 +67,12 @@ All address arithmetic is done modulo the size of the ARENA.
 CORE is typically initialized to DAT #0, #0.  However, it might instead be initialized to DAT #nnn, #nnn, where nnn is a number from 0 to 255.
 
 I prefer to set CORE as a prime number, to confound trivial bombing programs a bit.
+
+## RAM Banking
+
+The arena is stored RAM banks, starting at bank 10.  If each cell is 5 bytes, then a bank can 
+hold up to 1638 cells.  I put 1500 cells in a bank, and since the arena is currently around 8200 cells, 
+the arena takes up 6 banks.
 
 # Opcodes
 
@@ -144,11 +148,10 @@ rent instruction and retrieves the number stored at the specified lo-
 cation; this number is then interpreted as  an offset  from its own
 address. The number found  at this second location is the operand.
 
-### Indirect predecrement
+### Indirect Predecrement '<'
 
-I totally jettisoned it.  This one is too powerful and encourages
-excessively short IMP-like programs that have no brain whatsoever.
-Gone, good bye, good riddance.
+Pre-Decrement Indirect decrements memory as it is evaluating the operands.  
+It evaluates operand A before evaluating operand B.
 
 ### Example
 
@@ -158,19 +161,15 @@ Gone, good bye, good riddance.
 
 # THE MEMORY CELL
 
-The memory cell is a 4 byte C struct, vaguely reminiscent of Lua opcodes:
+The memory cell is a 5 byte C struct, vaguely reminiscent of Lua opcodes:
 
     opcode:     4 bits
     a-mode:     2 bits
     b-mode:     2 bits
-    a operand: 12 bits
-    b operand: 12 bits
+    a operand: 14 bits
+    b operand: 14 bits
 
-CC65 optimizes structures that are power-of-two sizes, so 4 bytes is the 
-golden size.
-
-The operand size (signed 12 bits) limits the memory window size to 4096 cells. 
-I think that's okay.  The arena/core is a bit short of 4K cells in size.
+The operand size (unsigned 14 bits) limits the memory window size to 16K cells. 
 
 # Build the Commander X16 binary
 
