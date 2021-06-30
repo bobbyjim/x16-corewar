@@ -96,6 +96,9 @@ int vm_execute() // unsigned char owner, unsigned char pid, int address)
     getOperandAData();
     getOperandBData();
 
+    //x16_printCell(&inst, "<-- ");
+    //printf("AValue[ %u ] BValue[ %u ] BAValue[ %u ]\r\n", AValue, BValue, BAValue);
+
     ipNext = ip + 1;
 
     switch(inst.opcode)
