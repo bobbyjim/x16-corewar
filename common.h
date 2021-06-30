@@ -27,7 +27,7 @@ Best to include it on the compile command with -DX16.
 #define     MAX_WARRIOR_LINES       256
 #define     LINE_BUFFER_SIZE        80
 
-#define     MAXIMUM_EPOCHS          8000
+#define     MAXIMUM_EPOCHS          32000
 
 #define     LOGICAL_FILE_NUM        1
 #define     IGNORE_LFN              0

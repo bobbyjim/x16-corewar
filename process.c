@@ -67,7 +67,7 @@ void process_add(unsigned char owner, unsigned int address)
     }
     else
     {
-       x16_ps_log("FAILED add-process", owner, foundpid, address);
+       x16_ps_log("** failed ** add-process", owner, foundpid, address);
     }
 
 }

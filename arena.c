@@ -74,13 +74,16 @@ Cell* arena_getLocation(int position)
    return &CORE_MEMORY(position); //&arena[ position % CORESIZE];
 }
 
+Cell arena_tmp_cell;
+
 /*
      We need this due to banking.
  */
 void arena_setData(int target, int source)
 {
    Cell *src = arena_getLocation(source);
-   arena_setLocation(target, src);
+   arena_tmp_cell = *src; // copy
+   arena_setLocation(target, &arena_tmp_cell);
 }
 
 void arena_setLocation(int target, Cell *copy)

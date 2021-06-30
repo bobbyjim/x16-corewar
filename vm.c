@@ -87,17 +87,10 @@ int vm_execute() // unsigned char owner, unsigned char pid, int address)
     x16_arena_touch(ip, owner);
 
     inst_ptr = arena_getLocation(ip);
-    inst.opcode = inst_ptr->opcode;
-    inst.aMode  = inst_ptr->aMode;
-    inst.A      = inst_ptr->A;
-    inst.bMode  = inst_ptr->bMode;
-    inst.B      = inst_ptr->B;
+    inst = *inst_ptr; // copy
 
     getOperandAData();
     getOperandBData();
-
-    //x16_printCell(&inst, "<-- ");
-    //printf("AValue[ %u ] BValue[ %u ] BAValue[ %u ]\r\n", AValue, BValue, BAValue);
 
     ipNext = ip + 1;
 
