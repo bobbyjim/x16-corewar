@@ -275,9 +275,6 @@ unsigned char cell_loadInstruction(char *input)
     argc = sscanf(input, " %3s %s %s", opcode, a, b);
     opcode_value = cell_encode_opcode(opcode);
 
-    printf("cell_loadInstruction() argc   [%u]\n", argc);
-    printf("cell_loadInstruction() opcode [%u]\n", opcode_value);
-
     if (opcode_value == INVALID_OPCODE)
        return INVALID_OPCODE;
    
