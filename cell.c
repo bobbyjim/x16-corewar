@@ -222,7 +222,7 @@ unsigned char cell_encode_opcode(char *opcode)
 
 void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
 {
-   int rawValue;
+   int rawValue = 0;
    switch(*src)
    {
        case '#': 
@@ -254,7 +254,7 @@ void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
 
 /*
  
-    Load the instruction into *tempCell
+    Parse the instruction into *tempCell
 
  */
 unsigned char cell_loadInstruction(char *input)
@@ -263,27 +263,46 @@ unsigned char cell_loadInstruction(char *input)
     char a[8] = ""; 
     char b[8] = "";
     unsigned char opcode_value;
+    unsigned char argc;
 
     unsigned char amode = 0;
     unsigned char bmode = 0;
     unsigned int aval   = 0;
     unsigned int bval   = 0;
-    
-    if (sscanf(input, " %3s %s %s", opcode, a, b) != 3)
-        return INVALID_OPCODE;
-    
-    if (opcode[0] == ';') // comment!
-        return INVALID_OPCODE;
 
+    input = strtok(input, ";"); // wipe out comments
+
+    argc = sscanf(input, " %3s %s %s", opcode, a, b);
+    opcode_value = cell_encode_opcode(opcode);
+
+    printf("cell_loadInstruction() argc   [%u]\n", argc);
+    printf("cell_loadInstruction() opcode [%u]\n", opcode_value);
+
+    if (opcode_value == INVALID_OPCODE)
+       return INVALID_OPCODE;
+   
     cell_decode_operand(a, &amode, &aval);
     cell_decode_operand(b, &bmode, &bval);
 
-    opcode_value = cell_encode_opcode(opcode);
     tempCell.opcode  = opcode_value;
     tempCell.aMode  = amode;
     tempCell.A      = aval;
     tempCell.bMode  = bmode;
     tempCell.B      = bval;
+
+    //
+    //  OK it's a valid opcode.
+    //  Now check for only one operand.
+    //  This is handled elegantly for all cases EXCEPT DAT/HCF.
+    //
+    if (argc == 2 && opcode_value == HCF) 
+    {
+        // for DAT, move A into B
+        tempCell.B     = tempCell.A;
+        tempCell.bMode = tempCell.aMode;
+        tempCell.A     = 0;
+        tempCell.aMode = 0;
+    }
 
     return opcode_value;
 }
