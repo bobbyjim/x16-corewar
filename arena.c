@@ -19,25 +19,6 @@ Cell arena[CORESIZE];
 unsigned char corewar_system_status;
 Cell* tmp;
 
-char cellChar[16] = {
-   '.',     // hcf
-   95,      // mov
-   '+',     // add
-   '-',     // sub
-   94,      // jmp
-   172,     // jmn
-   187,     // jmz
-   188,     // seq
-   190,     // slt
-   195,     // sne
-   195,     // flp
-   216,     // djn
-   '?',     // 
-   '?',     // 
-   215,     // xch
-   172      // spl
-};
-
 void arena_clearLocation(int position, unsigned char doRandomize)
 {
    // doRandomize:

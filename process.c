@@ -33,8 +33,6 @@ void process_init()
 {
     int w, wp;
 
-    epoch = 0;
-
     for(w=0; w<WARRIORS_MAX; ++w)
     {
         currentProcess[w] = 0;
@@ -134,37 +132,6 @@ unsigned char process_countWarriors()
            if (process[owner][pid] == PROCESS_INVALID)
               continue;
 
-            alive = 1;
-            break; // next warrior           
-       }
-       liveWarriors += alive;
-    }
-    return liveWarriors;
-}
-
-//
-// run for 1 epoch
-// return the number of live warriors
-//
-unsigned char process_runCorewar() 
-{
-    liveWarriors = 0;
-    for(owner=0; owner<WARRIORS_MAX; ++owner)
-    {
-       alive = 0;
-       // scan to next valid process
-       for(i = currentProcess[owner]; i < (currentProcess[owner] + WARRIOR_PROCESSES_MAX); ++i)
-       {
-           pid = i % WARRIOR_PROCESSES_MAX;
-           if (process[owner][pid] == PROCESS_INVALID)
-              continue;
-
-            address = process[owner][pid];
-            process[owner][pid] = vm_execute(); // owner, pid, process[owner][pid]);
-            //
-            // Housekeeping
-            // 
-            currentProcess[owner] = pid + 1;
             alive = 1;
             break; // next warrior           
        }

@@ -20,6 +20,7 @@
 #include "cell.h"
 #include "bank.h"
 #include "arena.h"
+#include "process.h"
 
 extern unsigned char corewar_system_status; // from arena.c
 
@@ -30,11 +31,11 @@ extern unsigned char currentBank; // from bank.c
 extern unsigned int epoch; // from process.c
 
 #ifdef  X16
-void x16_show_banked_message(unsigned int bank, unsigned int index)
+void x16_show_banked_message(unsigned int index)
 {
     unsigned int x;
 
-    setBank(bank);
+    setBank(HELP_BANK);
 
     for (x=index; x<index+800; ++x)
        if (PEEK(x) == 0)
@@ -54,14 +55,14 @@ void x16_init()
    cbm_k_setlfs(0,8,0);
    cbm_k_load(2, 0x0f800);
 
-   x16_loadfile( "text.bin", 0xb000 ); // put useful text at the end of bank 1
+   x16_loadfile( "text.bin", HELP_BANK, 0xa000 ); // put useful text in bank 2
    bgcolor(BLACK);
    textcolor(GREEN);
    clrscr();
 
    gotoxy(0,20);
 
-   x16_show_banked_message(1, 0xb000);
+   x16_show_banked_message(0xa000);
 
    gotoxy(0,40);
    textcolor(LTRED);
@@ -93,7 +94,7 @@ void x16_help()
 {
 #ifdef X16
    textcolor(GREEN);
-   x16_show_banked_message(1, 0xb000 + 800);
+   x16_show_banked_message(0xa000 + 800);
    textcolor(DEFAULT_COLOR);
 #else
 puts("-------------------------- CORESHELL COMMANDS --------------------------------");
@@ -120,7 +121,7 @@ void x16_opcode_help()
 {
 #ifdef X16
     textcolor(GREEN);
-    x16_show_banked_message(1, 0xb000 + 1600);
+    x16_show_banked_message(0xa000 + 1600);
     textcolor(DEFAULT_COLOR);
 #else
 
@@ -161,9 +162,10 @@ int x16_getc()
 #endif
 }
 
-void x16_loadfile(char* name, unsigned int location)
+void x16_loadfile(char* name, unsigned char bank, unsigned int location)
 {  
 #ifdef X16
+   setBank(bank);
    cbm_k_setnam(name);
    cbm_k_setlfs(IGNORE_LFN,EMULATOR_FILE_SYSTEM,SA_IGNORE_HEADER);
    cbm_k_load(LOAD_FLAG, location);
@@ -233,7 +235,15 @@ void x16_arena_draw()
    unsigned char y;
    unsigned char x;
 
-   cputsxy(70,0, "01234567e ");
+   gotoxy(70,0);
+   for(x=0; x<WARRIORS_MAX; ++x)
+   {
+       textcolor(x+2);
+       cputc('1'+x);
+   }
+   textcolor(DEFAULT_COLOR);
+   cputc(' ');
+   cputc('e');
    textcolor(DKGREY);
    for(pos=0; pos<CORESIZE; ++pos)
    {
@@ -241,6 +251,7 @@ void x16_arena_draw()
        x = pos % 80;
        cputcxy(x,3+y/2,SQUARE_SW);
    }
+   textcolor(DEFAULT_COLOR);
 #else
     printf(" ");
     for(pos=0; pos<CORESIZE/2; ++pos)
@@ -271,7 +282,7 @@ void x16_arena_touch(int ip, unsigned char owner)
    textcolor(DEFAULT_COLOR);
    if ( epoch % 250 == 0)
    {
-      cputcxy(78,1, '0' + epoch*10/MAXIMUM_EPOCHS);
+      cputcxy(79,1, '0' + (epoch*10)/MAXIMUM_EPOCHS);
       gotoxy(0,0);
    }
 //   cputcxy(79,1, '0' + currentBank - 10);

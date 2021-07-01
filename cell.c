@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,27 +27,14 @@ char* opcodes[16] = {
 	/*  9 */ "sne", 
 	/* 10 */ "flp", 
 	/* 11 */ "djn", 
-	/* 12 */ "...", 
-	/* 13 */ "...", 
+	/* 12 */ "inc", 
+	/* 13 */ "dec", 
     /* 14 */ "xch",
 	/* 15 */ "spl"  
 };
 
-/////////////////////////////////////////////////////////////////
-//
-//  It appears that we're blowing the call stack of the 65C02.
-//  So in an effort to sidestep nested calls, let's break this
-//  into two separate pieces:
-//
-//  First, see if we can build a list of parsed cells.
-//
-//  If we can do that, then we can load them in a loop.
-//  Maybe.
-//
-/////////////////////////////////////////////////////////////////
 Cell program[256]; // up to 256 parsed instructions
 unsigned char programSize;
-
 
 unsigned int location; // where the parsed instructions should go
 
@@ -58,6 +44,7 @@ unsigned char buffer_position = 0;
 unsigned int bankAddress;
 unsigned char eoln = 0x0a;
 unsigned char eof = '\0';
+unsigned char c;
 
 char modes[] = { 
         '#',    // value (0)
@@ -66,13 +53,21 @@ char modes[] = {
         '<'     // address indirect predecrement (3)
 };
 
+/********************************************************************
+ *
+ *   Load a redcode file.
+ *
+ *   If X16: load into bank 1.
+ *   Else: read by line and load directly into the arena.
+ *
+ ********************************************************************/
 void cell_loadFile(char *filename)
 {
 #ifdef X16
     //
     //  Load file into Bank 1
     // 
-    setBank(1);
+    setBank(REDCODE_BANK);
     bankAddress = 0xa000;
     memset( (unsigned char*) bankAddress, 0x00, 4096);
     cprintf("loading %s\r\n", filename);
@@ -84,7 +79,7 @@ void cell_loadFile(char *filename)
     int ok;
 
     while (fgets(buffer, LINE_BUFFER_SIZE, fp) != NULL)
-       if (cell_load(buffer) != INVALID_OPCODE)
+       if (cell_loadInstruction(buffer) != INVALID_OPCODE)
        {
           arena_setLocation(location, &tempCell);
           location++;
@@ -120,22 +115,30 @@ unsigned char readBankLine()
 
     while(buffer_position < LINE_BUFFER_SIZE)
     {
-       if (PEEK(bankAddress) == eof) // we are SO done
+       c = PEEK(bankAddress);
+       if (c == eof) // we are SO done
           return eof;
 
-       if (PEEK(bankAddress) == eoln)  // line is ready?
+       if (c == eoln)  // line is ready?
        {
           ++bankAddress; // eat end of line
           if (buffer_position > 0) // yeah, line is ready.
             return eoln;
        }
 
-       buffer[buffer_position] = PEEK(bankAddress);
+       ++bankAddress; // ready next char
+
+       if (c == ',' || c == ':') // throw , and : on the floor
+          continue;
+
+       //
+       //  Okay, we found a character we can keep.
+       // 
+       buffer[buffer_position] = c;
        
        if (buffer[buffer_position] > 96) 
           buffer[buffer_position] -= 32; // to PETSCII uppercase
 
-       ++bankAddress;
        ++buffer_position;
    }
 
@@ -187,7 +190,7 @@ void cell_parseBank()
        }
        else 
        {
-          if (cell_load(buffer) != INVALID_OPCODE )
+          if (cell_loadInstruction(buffer) != INVALID_OPCODE )
              cell_storeInProgram();
           else
              cprintf("fail\r\n");
@@ -236,7 +239,7 @@ void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
             *mode = PREDECREMENT_INDIRECT;
             ++src;
             break;
-            
+
        default:  
             *mode = DIRECT;
             break;
@@ -254,7 +257,7 @@ void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
     Load the instruction into *tempCell
 
  */
-unsigned char cell_load(char *input)
+unsigned char cell_loadInstruction(char *input)
 {
     char opcode[3] = "";
     char a[8] = ""; 

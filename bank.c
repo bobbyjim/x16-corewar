@@ -7,14 +7,13 @@
 
 unsigned char currentBank;
 
+void switchToRedcodeBank()
+{
+    setBank(REDCODE_BANK);
+}
 void switchToHelpBank()
 {
-    if (currentBank == 1) return;
-    currentBank = 1;
-#ifdef X16
-    POKE(0x9f61, 1); // r38-
-    POKE(0, 1);      // r39+
-#endif
+    setBank(HELP_BANK);
 }
 
 void setBank(unsigned char bank)

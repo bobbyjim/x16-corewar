@@ -36,6 +36,7 @@ void repl()
    for(;;)
    {      
       process_dump();
+
       if (! strcmp(lineInputBuffer,"help")) 
       {
         x16_help();
@@ -90,7 +91,6 @@ void repl()
              ip = vm_execute();
              process_postExecute(ip);
           }
-          //warriorCount = process_runCorewar();
           x16_arena_dump(ip, ip+25);
           process_dump();
       }
@@ -128,7 +128,7 @@ void repl()
       else if (strlen(lineInputBuffer) > 0) // maybe its a line?
       {
           cell_setLocation(ip);
-          if (cell_load(lineInputBuffer) != INVALID_OPCODE)             
+          if (cell_loadInstruction(lineInputBuffer) != INVALID_OPCODE)             
             ++ip;
       }
       x16_prompt(ip);

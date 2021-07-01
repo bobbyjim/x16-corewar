@@ -13,7 +13,7 @@ void x16_clrscr();
 int x16_getc();
 
 void x16_printCell(Cell *cell, char* postfix);
-void x16_loadfile(char *filename, unsigned int location);
+void x16_loadfile(char *filename, unsigned char bank, unsigned int location);
 
 void x16_arena_draw();
 void x16_arena_dump(int start, int end);

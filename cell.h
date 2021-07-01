@@ -2,18 +2,43 @@
 #define _CELL_H_
 
 typedef struct {
-	unsigned char opcode: 4;
-	unsigned char flag1 : 4;
-/*
-	unsigned char flag2 : 8;
-	unsigned char flag3 : 8;
-	unsigned char flag4 : 8;
-*/
+	unsigned char opcode: 5;
+
+	unsigned char flag1 : 1;
+	unsigned char flag2 : 1;
+	unsigned char flag3 : 1;
+
 	unsigned char aMode : 2;
 	unsigned int A  	: 14; 
 	unsigned char bMode : 2;
 	unsigned int B  	: 14; 
 } Cell;
+
+#define			INVALID_OPCODE				16
+
+#define			IMMEDIATE					0
+#define			DIRECT						1
+#define			INDIRECT					2
+#define			PREDECREMENT_INDIRECT		3
+
+#define			HCF				0
+#define			MOV				1
+#define			ADD				2
+#define			SUB				3
+#define			JMP				4
+#define			JMN				5
+#define			JMZ				6
+#define			SEQ				7
+// these two are the same ---------
+#define			CMP				7
+#define			SLT				8
+#define			SNE				9
+#define			FLP				10
+#define			DJN				11
+#define			INC				12
+#define			DEC				13
+#define			XCH				14
+#define			SPL				15
 
 /*
 [There was actually discussion on the rec.games.corewar in 1991
@@ -68,24 +93,6 @@ that option.
 
 */
 
-#define			HCF				0
-#define			MOV				1
-#define			ADD				2
-#define			SUB				3
-#define			JMP				4
-#define			JMN				5
-#define			JMZ				6
-#define			SEQ				7
-// these two are the same ---------
-#define			CMP				7
-#define			SLT				8
-#define			SNE				9
-#define			FLP				10
-#define			DJN				11
-//#define							12
-//#define							13
-#define			XCH				14
-#define			SPL				15
 /*
 First let me say that we do not really need all the comparison statements,
 we would only need.....
@@ -137,13 +144,6 @@ They absolutely do not convert easily to '88 standard.
 - Campbell Fraser, 10 Dec 1991, rec.games.corewar
 */
 
-#define			INVALID_OPCODE				16
-
-#define			IMMEDIATE					0
-#define			DIRECT						1
-#define			INDIRECT					2
-#define			PREDECREMENT_INDIRECT		3
-
 
 void cell_setLocation(unsigned int destination);
 void cell_loadFile(char *filename);
@@ -152,7 +152,7 @@ void cell_storeInProgram();
 void cell_copyProgramIntoCore();
 
 void loadProgram(char *buffer[], unsigned char bufsiz, int startLocation);
-unsigned char cell_load(char *input);
+unsigned char cell_loadInstruction(char *input);
 char* getOpcodeName(Cell *cell);
 char  getMode(unsigned char mode);
 

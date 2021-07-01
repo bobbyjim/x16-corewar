@@ -197,6 +197,10 @@ int vm_execute() // unsigned char owner, unsigned char pid, int address)
             process_add(owner, PCA);
             break;
 
+        case DEC:
+        case INC:  // TO DO
+           break;  
+
         //
         // The XCH (exchange) instructions exchanges the A-field and
         // the B-field of the instruction pointed to by the A-operand.
