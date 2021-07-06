@@ -37,9 +37,9 @@ void arena_clearLocation(int position, unsigned char doRandomize)
    tmp = &CORE_MEMORY(position); // &arena[ position % CORESIZE ];
    tmp->opcode = HCF;
    tmp->aMode  = 0;
-   tmp->A      = doRandomize? rand() : 0;
+   tmp->A      = doRandomize? rand()%256 : 0;
    tmp->bMode  = 0;
-   tmp->B      = doRandomize? rand() : 0;
+   tmp->B      = doRandomize? rand()%256 : 0;
 }
 
 void arena_init(unsigned char doRandomize)

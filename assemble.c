@@ -31,7 +31,7 @@ int getLabelLineNumber(char* label)
          return i;
    }
 
-   printf("\r\n************************************\r\nerror - label [%s] not found\r\n************************************\r\n\r\n", label);
+   printf(" ** error - label [%s] not found\r\n", label);
    return -1; // ??
 }
 

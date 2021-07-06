@@ -47,47 +47,16 @@ __DATA__
 
  -----------------------------------------------------------------------------
 
- ;  ***  opcode guidelines  ***
- ;
- ;
- ;  --> begin every redcode file with three semicolons ';;;'
- ;
- ;  - operand expressions are not supported
- ;
- ;  - empty lines and whitespace are fine
- ;  
- ; 
- ;  mode example 1:
-    
-    add #17 2
-
- ; 
- ;  - adds 17 to the address core.[ pc+2 ]'s B-field
- ;
- ;  - immediate numeric values start with '#'
- ;
- ;
- ;  mode example 2: 
- ;
-    mov #3 @2
-
- ;
- ;  - moves the value '3' to address offset pc + 2 + core.[ pc+2 ]
- ;
- ;  - indirect addresses starts with '@'
- ;
- ;
- ;  mode example 3: 
-
-    jmp -2 #-99
-
- ;
- ; - negative addresses refer to previous locations
- ;
- ; - negative numbers are forced to [0..coresize]
- ;
- ;    - hint: coresize-1 is knowable with #-1
- ;
- ;
- ;  ***  end guide  ***
+     Two computer programs in their native habitat -- the memory chips of a 
+ digital computer -- stalk each other from address to address. Sometimes they
+ go scouting for the enemy; sometimes they lay down a barrage of numeric bombs;
+ sometimes they copy themselves out of danger or stop to repair damage. 
  
+ This is the game I call Core War. It is unlike almost all other computer games
+ in that people do not play at all! The contending programs are written by 
+ people, of course, but once a battle is under way the creator of a program can
+ do nothing but watch helplessly, as the product of hours spent in design and 
+ implementation either lives or dies on the screen. The outcome depends
+ entirely on which program is hit first in a vulnerable area.
+
+ - A. K. Dewdney, 1984

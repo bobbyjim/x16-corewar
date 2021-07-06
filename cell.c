@@ -215,17 +215,9 @@ void cell_parseBank()
        }
        else if (buffer[0] == ';') // this is just a comment
        {
-          //cprintf("comment: %s\r\n", buffer);
        }
        else 
        {
-           /*
-          if (cell_parseInstruction(buffer) != INVALID_OPCODE )
-             cell_storeInProgram();
-          else
-             cprintf("invalid opcode\r\n");
-            */
-
           tokenize(buffer);
        }
     }

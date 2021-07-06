@@ -202,7 +202,7 @@ void adjustDAT()
      strncpy(line, input, 80);
      token_wipe(topToken);
      sanitize(line);
-//     printf("line: [%s]\n", line);
+     //printf("line: [%s]\n", line);
 
      if (line[0] == '\0') 
         return INVALID_OPCODE;

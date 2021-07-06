@@ -30,6 +30,33 @@ int readLine()
    return 1;
 }
 
+void run()
+{
+   int ip = 0;
+
+   x16_stepMode = 0;
+   x16_clrscr();
+   x16_arena_draw();
+   origWarriorCount = process_countWarriors();
+   while (process_prepareNextToRun() && process_continue())
+   {
+      ip = vm_execute();
+      process_postExecute(ip);
+   }
+
+   x16_top();
+   warriorCount = process_countWarriors();
+   if (warriorCount == 1)
+   {
+      lastWarrior = process_lastWarrior();
+      x16_putValue("winner", lastWarrior+1);
+   }
+   else if (origWarriorCount == 1)
+      x16_msg("suicide!");
+   else
+      x16_msg("stalemate!");
+}
+
 void repl()
 {
    int ip = 100;
@@ -38,7 +65,7 @@ void repl()
       process_dump();
 
       if (! strcmp(lineInputBuffer,"help")) x16_help();
-      else if (sscanf(lineInputBuffer, "new %u", &warrior) == 1) process_add(warrior,ip);
+      else if (sscanf(lineInputBuffer, " new %u ", &warrior) == 1) process_add(warrior,ip);
       else if (! strcmp(lineInputBuffer,"clear"))
       {
          x16_msg("initializing core.");
@@ -51,8 +78,8 @@ void repl()
          arena_init(1);
          process_init();
       }
-      else if (sscanf(lineInputBuffer,"d %d", &ip) == 1) x16_arena_dump(ip, ip+30);
-      else if (sscanf(lineInputBuffer,"load %s", filename) == 1)
+      else if (sscanf(lineInputBuffer," d %d ", &ip) == 1) x16_arena_dump(ip, ip+30);
+      else if (sscanf(lineInputBuffer," load %s ", filename) == 1)
       {
         /*
             loadWarrior()
@@ -95,30 +122,7 @@ void repl()
       }
       else if (! strcmp(lineInputBuffer,"run"))
       {
-         x16_stepMode = 0;
-         x16_clrscr();
-         x16_arena_draw();
-         origWarriorCount = process_countWarriors();
-         while (process_prepareNextToRun() && process_continue())
-         {
-            ip = vm_execute();
-            process_postExecute(ip);
-         }
-
-         x16_top();
-         warriorCount = process_countWarriors();
-         if (warriorCount == 1)
-         {
-            lastWarrior = process_lastWarrior();
-            x16_putValue("winner", lastWarrior+1);
-         }
-         else if (origWarriorCount == 1)
-            x16_msg("suicide!");
-         else
-            x16_msg("stalemate!");
-
-         //x16_msg("press a key to return to menu");
-         //x16_getc();
+         run();
       }
       else if (strlen(lineInputBuffer) > 0) // maybe its a line?
       {
@@ -142,13 +146,119 @@ void repl()
    }
 }
 
+void load(int num)
+{
+   int ip = rand() % CORESIZE;
+   cell_setLocation(ip);
+   cell_copyProgramIntoCore();
+   //
+   // Skip any initial HCF (i.e. DAT) instructions.
+   //
+   while(arena_getLocation(ip)->opcode == HCF) ++ip;
+   process_add(num, ip);
+}
+
+void runDemo()
+{
+   // plague
+   tokenizer_init();
+   tokenize("   spl 13  #0");
+   tokenize("   spl 12  #0");
+   tokenize("   add #24 10");
+   tokenize("   jmz -1  @9");
+   tokenize("   mov 12  @8");
+   tokenize("   mov 12  <7");
+   tokenize("   add #1  6");
+   tokenize("   jmp -5  #0");
+   tokenize("   dat #0  #1");
+   tokenize("   dat #0  #2");
+   tokenize("   dat #0  #3");
+   tokenize("   dat #0  #4");
+   tokenize("   dat #0  #5");
+   tokenize("   mov 2   <2");
+   tokenize("   jmp -1  #0");
+   tokenize("   dat #0  #-16");
+   tokenize("   jmp -1  #0");
+   tokenize("   spl 0   #0");
+   assemble();
+   load(0);
+
+   // agony
+   tokenizer_init();
+   tokenize("scan    sub incr   comp");
+   tokenize("comp    cmp -5341  -5353");
+   tokenize("        slt #in13  comp");
+   tokenize("        djn scan   <-5512");
+   tokenize("        mov #12    count");
+   tokenize("        mov comp   bptr");
+   tokenize("bptr    dat #0");
+   tokenize("split   mov bomb   <bptr");
+   tokenize("count   djn split  #0");
+   tokenize("        jmn scan   scan");
+   tokenize("bomb    spl 0");
+   tokenize("incr    mov -28    <-28");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("        dat     #0");
+   tokenize("in12    dat     #0");
+   tokenize("in13    dat     #0");
+   assemble();
+   load(1);
+
+   // xtc
+   tokenizer_init();
+   tokenize("loop  add #412 ptr");
+   tokenize("ptr   jmz loop trap");
+   tokenize("      mov ptr  dest");
+   tokenize("cnt   mov #23  cnt");
+   tokenize("kill  mov @trap <dest");
+   tokenize("      djn kill cnt");
+   tokenize("      jmp loop");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("dest  dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("      dat 0");
+   tokenize("trap  dat bomb");
+   tokenize("bomb  spl trap trap");
+   assemble();
+   load(2);
+
+   run();
+}
+
 int main()
 {
-    x16_init();
-    process_init();  
-    x16_help(); 
-    x16_msg("** operand expressions not supported");
-    x16_msg(""); // newline
-    repl();
+    unsigned char demo = x16_init();
+
+    process_init();
+
+    if (demo)
+    {
+       runDemo();
+       repl();
+    }
+    else
+    {
+       x16_help(); 
+       x16_msg("** operand expressions not supported");
+       x16_msg(""); // newline
+       repl();
+    }
     return 0;
 }

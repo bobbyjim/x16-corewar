@@ -47,9 +47,13 @@ void x16_show_banked_message(unsigned int index)
 }
 #endif
 
-void x16_init()
+unsigned char x16_init()
 {
+   unsigned char demo = 0;
+
 #ifdef X16
+   unsigned long wait = 800000;
+
    cbm_k_bsout(0x8E); // revert to primary case
    cbm_k_setnam("petfont.bin");
    cbm_k_setlfs(0,8,0);
@@ -68,7 +72,17 @@ void x16_init()
    textcolor(LTRED);
    cputs("                    * * *   press a key to begin   * * *");
    textcolor(DEFAULT_COLOR);
-   cgetc();
+
+   demo = 1;
+   while(--wait)
+   {
+      if (kbhit())
+      {
+          demo = 0;
+          break;
+      }
+   }
+
    clrscr();
 
    _randomize(); 
@@ -88,6 +102,8 @@ void x16_init()
 
    srand(time(0));
 #endif
+
+   return demo;
 }
 
 void x16_help()
@@ -142,8 +158,8 @@ void x16_opcode_help()
 void x16_prompt(int ip)
 {
 #ifdef X16
-    //cprintf("\r\ncoreshell %u (%u) ", _heapmemavail(), ip);
-    cprintf("\r\ncoreshell (@%u) ", ip);
+    cprintf("\r\ncoreshell %u (%u) ", _heapmemavail(), ip);
+    //cprintf("\r\ncoreshell (@%u) ", ip);
 #else
     printf("\ncoreshell [%u] ", ip);
 #endif
@@ -255,6 +271,7 @@ void x16_arena_draw()
    unsigned char y;
    unsigned char x;
 
+   /*
    gotoxy(WARRIOR_LIST_LEFT,0);
    for(x=0; x<WARRIORS_MAX; ++x)
    {
@@ -262,8 +279,8 @@ void x16_arena_draw()
        cputc('1'+x);
    }
    textcolor(DEFAULT_COLOR);
-   //cputc(' ');
-   //cputc('e');
+   */
+
    textcolor(DKGREY);
    for(pos=0; pos<CORESIZE/2; ++pos)
    {

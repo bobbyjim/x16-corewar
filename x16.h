@@ -7,7 +7,7 @@
 #define     ARENA_LEFT          0
 #define     WARRIOR_LIST_LEFT   72
 
-void x16_init();
+unsigned char x16_init();
 void x16_help();
 void x16_opcode_help();
 
