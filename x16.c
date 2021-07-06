@@ -25,7 +25,7 @@
 extern unsigned char corewar_system_status; // from arena.c
 
 unsigned char x16_stepMode = 0;
-unsigned char arena_square[2] = { SQUARE_SW, SQUARE_SE }; // , SQUARE_NW, SQUARE_NE };
+unsigned char arena_square[2][2] = {{SQUARE_NW, SQUARE_NE }, { SQUARE_SW, SQUARE_SE }}; 
 
 extern unsigned char currentBank; // from bank.c
 extern unsigned int epoch; // from process.c
@@ -97,23 +97,34 @@ void x16_help()
    x16_show_banked_message(0xa000 + 800);
    textcolor(DEFAULT_COLOR);
 #else
-puts("-------------------------- CORESHELL COMMANDS --------------------------------");
+puts(" ---------------------------- CORESHELL 1.0 ----------------------------------");
 puts("");
-puts("cls: clear screen                       logout: quit program                  ");
-puts("reset: clear arena memory               step: run one epoch                   ");
-puts("run: run!                               d nnn: display arena from nnn         ");
-puts("help: show this text                    new n: add a process                  ");
 puts("");
-puts("hcf   b: halt-catch-fire                mov a b                               ");
-puts("add a b: b += a                         sub a b: b -= a   ");
+puts("                  https://github.com/bobbyjim/x16-corewar");
 puts("");
-puts("jmp a  : jump to a                      jmn a b: jmp if b!=0");
-puts("jmz a b: jmp if b==0                    seq a b: ++ip if a==b");
-puts("slt a b: ++ip if a<b                    sne a b: ++ip if a!=b");
 puts("");
-puts("xch a  : exchange a,b at a              spl a  : split to a ");
+puts("      clear   : clear core                     logout: quit program           ");
+puts("      random  : randomize core                 help  : show this text        ");
+puts("      run     : begin or continue run          step  : run one epoch         ");
 puts("");
-puts("------------------------------------------------------------------------------");
+puts("      d <nnn> : display core from <nnn> and set ip ");
+puts("      new <n> : add warrior <n> at current ip");
+puts("");
+puts("      load <redcode file> and add warrior");
+puts("");
+puts("");
+puts("      * redcode can also be entered at the prompt");
+puts("");
+puts("");
+puts("      --> begin every redcode file with three semicolons ';;;'");
+puts("");
+puts("");
+puts("      --> put space between the operands");
+puts("");
+puts("");
+puts("     ");
+puts("");
+puts(" -----------------------------------------------------------------------------");
 #endif
 }
 
@@ -131,8 +142,8 @@ void x16_opcode_help()
 void x16_prompt(int ip)
 {
 #ifdef X16
-    cprintf("\r\ncoreshell %u [%u] ", _heapmemavail(), ip);
-    //cprintf("\r\ncoreshell [%u] ", ip);
+    //cprintf("\r\ncoreshell %u (%u) ", _heapmemavail(), ip);
+    cprintf("\r\ncoreshell (@%u) ", ip);
 #else
     printf("\ncoreshell [%u] ", ip);
 #endif
@@ -178,7 +189,7 @@ void x16_printCell(Cell *cell, char* postfix)
 {
 #ifdef X16
     cprintf("%s    %c%-5u  %c%-5u", 
-        getOpcodeName(cell), 
+        getOpcodeName(cell->opcode), 
         getMode(cell->aMode),
         cell->A,
         getMode(cell->bMode),
@@ -189,7 +200,7 @@ void x16_printCell(Cell *cell, char* postfix)
        cputs(postfix);
 #else
     printf("%s    %c%-5u  %c%-5u %s", 
-        getOpcodeName(cell), 
+        getOpcodeName(cell->opcode), 
         getMode(cell->aMode),
         cell->A,
         getMode(cell->bMode),
@@ -221,10 +232,19 @@ void x16_msg2(char* a, char *b)
 void x16_putValue(char* label, unsigned int value)
 {
 #ifdef X16
-   cprintf("%s %u\r\n", label, value);
+   cprintf("%s: %u\r\n", label, value);
 #else
-   printf("%s %u\n", label, value);
+   printf("%s: %u\n", label, value);
 #endif
+}
+
+void x16_putString(char* label, char* value)
+{
+   #ifdef X16
+   cprintf("%s: %s\r\n", label, value);
+#else
+   printf("%s: %s\n", label, value);
+#endif 
 }
 
 void x16_arena_draw()
@@ -235,21 +255,21 @@ void x16_arena_draw()
    unsigned char y;
    unsigned char x;
 
-   gotoxy(70,0);
+   gotoxy(WARRIOR_LIST_LEFT,0);
    for(x=0; x<WARRIORS_MAX; ++x)
    {
        textcolor(x+2);
        cputc('1'+x);
    }
    textcolor(DEFAULT_COLOR);
-   cputc(' ');
-   cputc('e');
+   //cputc(' ');
+   //cputc('e');
    textcolor(DKGREY);
-   for(pos=0; pos<CORESIZE; ++pos)
+   for(pos=0; pos<CORESIZE/2; ++pos)
    {
        y = pos / 80;
        x = pos % 80;
-       cputcxy(x,3+y/2,SQUARE_SW);
+       cputcxy(ARENA_LEFT+x,ARENA_TOP+y/2,SQUARE_SW);
    }
    textcolor(DEFAULT_COLOR);
 #else
@@ -278,23 +298,26 @@ void x16_arena_touch(int ip, unsigned char owner)
    //
    //  We need to "compress" x into 80 positions.
    //
-   cputcxy(x/2, 3+y, arena_square[ip%2]); // was: CIRCLE_FILLED
+   cputcxy(ARENA_LEFT+x/2, ARENA_TOP+y/2, arena_square[y%2][x%2]); // was: CIRCLE_FILLED
    textcolor(DEFAULT_COLOR);
+   /*
    if ( epoch % 250 == 0)
    {
       cputcxy(79,1, '0' + (epoch*10)/MAXIMUM_EPOCHS);
       gotoxy(0,0);
-   }
-//   cputcxy(79,1, '0' + currentBank - 10);
+   }*/
 #else
     printf("%u @ %u\n\n", owner, ip);
 #endif
 }
 
+/*
+ *  Mark the space underneath this warrior's ID number.
+ */
 void x16_ps(unsigned char owner, char state)
 {
 #ifdef X16
-   cputcxy(70+owner,1, state);
+   cputcxy(WARRIOR_LIST_LEFT+owner,1, state);
 #endif
 }
 
@@ -321,6 +344,7 @@ void x16_arena_dump(int start, int end)
 {
    Cell *cell;
    int x;
+   int pos;
    int len = end - start;
 
    if (len < 0) // swap
@@ -331,26 +355,34 @@ void x16_arena_dump(int start, int end)
 
    for(x=0; x<len; ++x)
    {
-      cell = arena_getLocation(x+start);
+      pos = x + start;
+      if (pos < 0) pos += CORESIZE;
+      if (pos > CORESIZE) pos -= CORESIZE;
+
+      cell = arena_getLocation(pos);
 #ifdef X16
-      cprintf(" %5d:  ", x+start);
+      cprintf(" %5d:  ", pos);
 #else
-     printf(" %5d:  ", x+start);
+     printf(" %5d:  ", pos);
 #endif
       x16_printCell(cell, "     ");
 
-      cell = arena_getLocation(start+x+len);
+      pos += len;
+      if (pos > CORESIZE) pos -= CORESIZE;
+      cell = arena_getLocation(pos);
 #ifdef X16
-      cprintf(" %5d:  ", start+x+len);
+      cprintf(" %5d:  ", pos);
 #else
-     printf(" %5d:  ", start+x+len);
+     printf(" %5d:  ", pos);
 #endif
       x16_printCell(cell, "\r\n");
    }
 
+    x16_putValue("system status", corewar_system_status);
+/*
 #ifdef X16
     cprintf("st:%u\r\n", corewar_system_status);
 #else
     printf("st:%u\n", corewar_system_status);
-#endif
+#endif*/
 }

@@ -13,6 +13,8 @@
 #include "bank.h"
 #include "common.h"
 #include "x16.h"
+#include "token.h"
+#include "assemble.h"
 
 char* opcodes[16] = {
 	/*  0 */ "hcf", 
@@ -20,8 +22,8 @@ char* opcodes[16] = {
 	/*  2 */ "add",
     /*  3 */ "sub",
     /*  4 */ "jmp",
-	/*  5 */ "jmn", 
-	/*  6 */ "jmz", 
+	/*  5 */ "jmz", 
+	/*  6 */ "jmn", 
     /*  7 */ "seq",
     /*  8 */ "slt",
 	/*  9 */ "sne", 
@@ -33,18 +35,21 @@ char* opcodes[16] = {
 	/* 15 */ "spl"  
 };
 
-Cell program[256]; // up to 256 parsed instructions
+Cell program[256];   // up to 256 parsed instructions
 unsigned char programSize;
 
 unsigned int location; // where the parsed instructions should go
 
 Cell tempCell;
-char buffer[LINE_BUFFER_SIZE];
+char buffer[LINE_BUFFER_SIZE+1];
+extern unsigned int bankAddress; // bank.c
+unsigned char c;
+
 unsigned char buffer_position = 0;
 unsigned int bankAddress;
 unsigned char eoln = 0x0a;
 unsigned char eof = '\0';
-unsigned char c;
+
 
 char modes[] = { 
         '#',    // value (0)
@@ -52,6 +57,11 @@ char modes[] = {
         '@',    // address indirect (2)
         '<'     // address indirect predecrement (3)
 };
+
+Cell* getCell(unsigned char index)
+{
+    return &program[index];
+}
 
 /********************************************************************
  *
@@ -70,7 +80,6 @@ void cell_loadFile(char *filename)
     setBank(REDCODE_BANK);
     bankAddress = 0xa000;
     memset( (unsigned char*) bankAddress, 0x00, 4096);
-    cprintf("loading %s\r\n", filename);
     cbm_k_setnam(filename);
     cbm_k_setlfs(IGNORE_LFN,EMULATOR_FILE_SYSTEM,SA_IGNORE_HEADER);
     cbm_k_load(LOAD_FLAG, bankAddress);
@@ -78,13 +87,27 @@ void cell_loadFile(char *filename)
     FILE *fp = fopen(filename, "r");
     int ok;
 
+    if (fp == NULL)
+    {
+        printf("ERROR cannot open %s\n", filename);
+        return;
+    }
+
+    tokenizer_init();
     while (fgets(buffer, LINE_BUFFER_SIZE, fp) != NULL)
-       if (cell_loadInstruction(buffer) != INVALID_OPCODE)
+    {
+       tokenize(buffer);
+    }
+
+    printf("assembling\n");
+    assemble();
+    /*
+       if (cell_parseInstruction(buffer) != INVALID_OPCODE)
        {
           arena_setLocation(location, &tempCell);
           location++;
        }
-
+    */
     fclose(fp);
 #endif
 }
@@ -99,7 +122,7 @@ void eatBankWhitespace()
 {
     while( PEEK(bankAddress) == ' ' 
         || PEEK(bankAddress) == '\t' )
-        ++bankAddress;    
+        ++bankAddress; 
 }
 #endif
 
@@ -115,18 +138,17 @@ unsigned char readBankLine()
 
     while(buffer_position < LINE_BUFFER_SIZE)
     {
-       c = PEEK(bankAddress);
+       c = PEEK(bankAddress); // current char
        if (c == eof) // we are SO done
           return eof;
 
        if (c == eoln)  // line is ready?
        {
           ++bankAddress; // eat end of line
-          if (buffer_position > 0) // yeah, line is ready.
-            return eoln;
+          return eoln;   // and return line for processing.  yeah you heard me.
        }
 
-       ++bankAddress; // ready next char
+       ++bankAddress; // move read head...
 
        if (c == ',' || c == ':') // throw , and : on the floor
           continue;
@@ -149,6 +171,12 @@ unsigned char readBankLine()
    return 1;
 }
 #endif
+
+
+void cell_resetProgram()
+{
+    programSize = 0;
+}
 
 void cell_copyProgramIntoCore()
 {
@@ -179,6 +207,7 @@ void cell_parseBank()
     //
     //  Break up into lines and serve.
     //
+    tokenizer_init();
     while(readBankLine())
     {
        if (strlen(buffer) == 0) // ignore
@@ -190,12 +219,17 @@ void cell_parseBank()
        }
        else 
        {
-          if (cell_loadInstruction(buffer) != INVALID_OPCODE )
+           /*
+          if (cell_parseInstruction(buffer) != INVALID_OPCODE )
              cell_storeInProgram();
           else
-             cprintf("fail\r\n");
+             cprintf("invalid opcode\r\n");
+            */
+
+          tokenize(buffer);
        }
     }
+    assemble();
 #endif
 }
 
@@ -220,6 +254,19 @@ unsigned char cell_encode_opcode(char *opcode)
     return INVALID_OPCODE;
 }
 
+/*
+unsigned char cell_loadInstruction(int location, char *input)
+{
+   unsigned char result = cell_parseInstruction(input);
+
+   if (result != INVALID_OPCODE)
+      arena_setLocation(location, &tempCell);
+   
+   return result;
+}
+*/
+
+/*
 void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
 {
    int rawValue = 0;
@@ -251,13 +298,15 @@ void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
    
    *val = rawValue; 
 }
+*/
 
 /*
  
     Parse the instruction into *tempCell
 
  */
-unsigned char cell_loadInstruction(char *input)
+ /*
+unsigned char cell_parseInstruction(char *input)
 {
     char opcode[3] = "";
     char a[8] = ""; 
@@ -303,13 +352,15 @@ unsigned char cell_loadInstruction(char *input)
 
     return opcode_value;
 }
+*/
 
-char* getOpcodeName(Cell *cell)
+char* getOpcodeName(unsigned char code)
 {
-    return opcodes[cell->opcode];
+    return opcodes[code];
 }
 
 char  getMode(unsigned char mode)
 {
     return modes[mode];
 }
+

@@ -2,6 +2,7 @@
 #include <peekpoke.h>
 #include <conio.h>
 #endif
+#include <string.h>
 
 #include "bank.h"
 
@@ -39,3 +40,5 @@ void setCoreBank(int position)
     POKE(0, currentBank);      // r39+
 #endif
 }
+
+

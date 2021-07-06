@@ -25,7 +25,7 @@ unsigned int epoch;                               // run counter
 
 unsigned char x, y;
 
-unsigned char i,j;
+unsigned char pi,pj;
 unsigned char liveWarriors;
 unsigned char alive;
 
@@ -73,7 +73,7 @@ void process_add(unsigned char owner, unsigned int address)
 void process_remove(unsigned char owner, unsigned char pid)
 {
     x16_ps_log("remove-process", owner, pid, process[owner][pid]);
-    x16_ps(owner, 'x');
+    //x16_ps(owner, 'x');  <-- can't say for sure!
     process[owner][pid] = PROCESS_INVALID; // killed
 }
 
@@ -81,16 +81,21 @@ void process_dump()
 {
     int count = 0;
 
+    x16_msg("warrior no.  process  ip");
     for(x=0; x<WARRIORS_MAX; ++x)
        for(y=0; y<WARRIOR_PROCESSES_MAX; ++y)
           if (process[x][y] > -1)
           {
+             ++count;
 #ifdef X16
-             cprintf("%2d: warrior no. %d, process %d: [%u]\r\n", ++count, x, y, process[x][y]);
+             cprintf("     %d          %d     %d\r\n", x, y, process[x][y]);
 #else
-             printf("%2d: warrior no. %d, process %d: [%u]\n", ++count, x, y, process[x][y]);
+              printf("     %d          %d     %d\r\n", x, y, process[x][y]);
 #endif
           }     
+
+   if (count == 0)
+      x16_msg("   ---         ---    --");
 }
 
 /*
@@ -126,9 +131,9 @@ unsigned char process_countWarriors()
     {
        alive = 0;
        // scan to next valid process
-       for(i = currentProcess[owner]; i < (currentProcess[owner] + WARRIOR_PROCESSES_MAX); ++i)
+       for(pi = currentProcess[owner]; pi < (currentProcess[owner] + WARRIOR_PROCESSES_MAX); ++pi)
        {
-           pid = i % WARRIOR_PROCESSES_MAX;
+           pid = pi % WARRIOR_PROCESSES_MAX;
            if (process[owner][pid] == PROCESS_INVALID)
               continue;
 
@@ -147,14 +152,14 @@ unsigned char process_prepareNextToRun()
 {
     //cprintf("current: owner[%u] pid[%u] address[%d]\r\n", owner, pid, address);
     //cputcxy(70+owner,1,' '); // erase
-    for(j=0; j<WARRIORS_MAX; ++j)
+    for(pj=0; pj<WARRIORS_MAX; ++pj)
     {
        owner = (owner + 1) % WARRIORS_MAX;
        alive = 0;
        // scan to next valid process
-       for(i = currentProcess[owner]; i < (currentProcess[owner] + WARRIOR_PROCESSES_MAX); ++i)
+       for(pi = currentProcess[owner]; pi < (currentProcess[owner] + WARRIOR_PROCESSES_MAX); ++pi)
        {
-           pid = i % WARRIOR_PROCESSES_MAX;
+           pid = pi % WARRIOR_PROCESSES_MAX;
            //printf("checking pid [%u]\n", pid);
            if (process[owner][pid] == PROCESS_INVALID)
               continue;

@@ -44,7 +44,7 @@ void arena_clearLocation(int position, unsigned char doRandomize)
 
 void arena_init(unsigned char doRandomize)
 {
-   int pos;
+   int pos;      
    for(pos=0; pos<CORESIZE; ++pos)
       arena_clearLocation(pos, doRandomize);
 }

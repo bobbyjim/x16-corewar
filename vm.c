@@ -106,7 +106,10 @@ void getOperandBData()
 
 int vm_execute() // unsigned char owner, unsigned char pid, int address)
 {    
+    //register int ipNext_r;
+
     ip = address; // do this first
+
     x16_arena_touch(ip, owner);
 
     inst_ptr = arena_getLocation(ip);

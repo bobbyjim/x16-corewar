@@ -24,25 +24,26 @@ __DATA__
                   https://github.com/bobbyjim/x16-corewar
 
 
+      clear   : clear core                     logout: quit program           
+      random  : randomize core                 help  : show this text        
+      run     : begin or continue run          step  : run one epoch         
 
- ----------------------------- cli commands ----------------------------------
-                                                                     
-                                         
+      d <nnn> : display core from <nnn> and set ip 
+      new <n> : add warrior <n> at current ip
 
-    cls   clear   help   logout   opcodes   random   run 
-
-    load <redcode file>                     step: run one epoch
-
-    new n: add a process                    d nnn: display arena from nnn
+      load <redcode file> and add warrior
 
 
-
- --------------------------- opcode quickref ---------------------------------
-
+      * redcode can also be entered at the prompt
 
 
-    hcf   mov   add   sub   jmp   jmn   jmz   seq   slt   sne   xch   spl
+      --> begin every redcode file with three semicolons ';;;'
 
+
+      --> put space between the operands
+
+
+          
 
  -----------------------------------------------------------------------------
 
@@ -51,8 +52,7 @@ __DATA__
  ;
  ;  --> begin every redcode file with three semicolons ';;;'
  ;
- ;
- ;  - labels and operand expressions are not supported
+ ;  - operand expressions are not supported
  ;
  ;  - empty lines and whitespace are fine
  ;  

@@ -1,11 +1,11 @@
-SOURCES = main.c arena.c bank.c cell.c common.c process.c vm.c x16.c
+SOURCES = main.c arena.c assemble.c bank.c cell.c common.c process.c token.c vm.c x16.c
 
 PROGRAM = COREWAR
 
 CC65_TARGET = cx16
 
 CC	= cl65 
-CFLAGS 	= --cpu 65c02 -t $(CC65_TARGET) --create-dep $(<:.c=.d) -Ors -DX16
+CFLAGS 	= --cpu 65c02 -t $(CC65_TARGET) --create-dep $(<:.c=.d) -O -DX16
 LDFLAGS	= -t $(CC65_TARGET) -m $(PROGRAM).map
 OBJDIR  = .obj
 

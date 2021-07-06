@@ -1,4 +1,4 @@
-SOURCES = main.c arena.c bank.c cell.c common.c process.c vm.c x16.c
+SOURCES = main.c arena.c assemble.c bank.c cell.c common.c process.c token.c vm.c x16.c
 
 PROGRAM = COREWAR
 

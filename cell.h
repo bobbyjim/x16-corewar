@@ -2,19 +2,18 @@
 #define _CELL_H_
 
 typedef struct {
-	unsigned char opcode: 5;
-
+	unsigned char opcode: 4;
+/*
 	unsigned char flag1 : 1;
 	unsigned char flag2 : 1;
 	unsigned char flag3 : 1;
-
+	unsigned char flag4 : 1;
+*/
 	unsigned char aMode : 2;
 	unsigned int A  	: 14; 
 	unsigned char bMode : 2;
 	unsigned int B  	: 14; 
 } Cell;
-
-#define			INVALID_OPCODE				16
 
 #define			IMMEDIATE					0
 #define			DIRECT						1
@@ -26,11 +25,11 @@ typedef struct {
 #define			ADD				2
 #define			SUB				3
 #define			JMP				4
-#define			JMN				5
-#define			JMZ				6
-#define			SEQ				7
-// these two are the same ---------
+#define			JMZ				5
+#define			JMN				6
 #define			CMP				7
+// these two are the same ---------
+#define			SEQ				7
 #define			SLT				8
 #define			SNE				9
 #define			FLP				10
@@ -39,13 +38,26 @@ typedef struct {
 #define			DEC				13
 #define			XCH				14
 #define			SPL				15
+#define			INVALID_OPCODE	16
 
 /*
-[There was actually discussion on the rec.games.corewar in 1991
-about limiting the address "window" that an instruction could access 
-to something less than the full core.  -rje]
+There was discussion on the rec.games.corewar in 1991 about limiting the 
+address "window" that an instruction could access to something less than 
+the full core.  
 
-* * *
+There was also this from A.K. Dewdney in March 1985:
+
+...the range-limitation rule suggested by William J. Mitchell of the mathematics 
+department at Pennsylvania State University. ... Mitchell's suggestion requires some 
+elaboration. Allow each battle program to alter the contents of any location up to a 
+distance of some fixed number of addresses. Such a rule automatically keeps DWARF 
+from doing any damage outside this neighborhood. The rule has many other effects as 
+well, including a strong emphasis on movement. How else can a battle program get within 
+range of an opponent? The rule has much merit and I hope that some of the many readers 
+with a Core War system of their own will give it the further exploration it deserves.
+*/
+
+/*
 
    I have a confession.  I am a huge fan of the Motorola 68xxx family of
 microprocessors.  My apologies to anyone with some interest or sympathy for
@@ -76,49 +88,18 @@ that option.
 	JMZ: 923
 	JMN: 906
 
-	CMP: 773	<-- actually, CMP + SEQ together
-				Significant because CMP was the only Skip instruction
-				until 1994.
+	CMP: 773	CMP was the only Skip instruction until 1994.
 
 	DJN: 638	enables tight looping
 
 	SUB: 237    This would be more valuable if DJN went away.
-	SNE: 169	I think this is more useful than CMP/SEQ
+	SNE: 169	I think this is more useful than CMP.
 
 	SLT: 81		not significant
 	NOP: 51		not significant
 	MUL: 26		not significant
 	MOD: 25		not significant
 	DIV: 16		not significant
-
-*/
-
-/*
-First let me say that we do not really need all the comparison statements,
-we would only need.....
-
-comparison     current command    proposed command
-A == B         CMP A B            -------
-A <  B         SLT A B            -------
-A <= B         -------            SLE A B
-A != B         -------            SNE A B
-
-This is because (A < B) is the same as (B > A) and likewise (A <= B) is the
-same as (B >= A), thus the only reason the greater than comparison would be
-needed is to allow for tighter code in a small percentage of programs.
-
-- Ting Hsu, 12 Dec 1991, rec.games.corewar
-*/
-
-/*
-* SPL as it is currently defined in ICWS'88 places the new task at the back
-of the task queue such that all previously existing tasks (including the
-currently executing task with the SPL instruction) will execute one
-instruction each prior to the new task executing its first instruction.
-Each task has an equal share of the warrior's processor time (one instruction
-per turn).
-
-Jason W. Solinsky, 17 Jan 1992, rec.games.corewar
 */
 
 /*
@@ -144,16 +125,22 @@ They absolutely do not convert easily to '88 standard.
 - Campbell Fraser, 10 Dec 1991, rec.games.corewar
 */
 
+Cell* getCell(unsigned char index);
 
 void cell_setLocation(unsigned int destination);
 void cell_loadFile(char *filename);
 void cell_parseBank();
+
+void cell_resetProgram();
 void cell_storeInProgram();
 void cell_copyProgramIntoCore();
 
+
 void loadProgram(char *buffer[], unsigned char bufsiz, int startLocation);
-unsigned char cell_loadInstruction(char *input);
-char* getOpcodeName(Cell *cell);
+unsigned char cell_encode_opcode(char *opcode);
+//unsigned char cell_parseInstruction(char *input);
+//unsigned char cell_loadInstruction(int location, char* input);
+char* getOpcodeName(unsigned char code);
 char  getMode(unsigned char mode);
 
 #endif 

@@ -3,6 +3,10 @@
 
 #include "cell.h"
 
+#define     ARENA_TOP           8
+#define     ARENA_LEFT          0
+#define     WARRIOR_LIST_LEFT   72
+
 void x16_init();
 void x16_help();
 void x16_opcode_help();
@@ -24,6 +28,6 @@ void x16_ps_log(char *msg, unsigned char owner, unsigned char pid, int addr);
 void x16_msg(char* s);
 void x16_msg2(char* a, char *b);
 void x16_putValue(char* label, unsigned int value);
-
+void x16_putString(char* label, char* value);
 void x16_ps(unsigned char owner, char state);
 #endif
