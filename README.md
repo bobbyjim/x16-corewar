@@ -111,6 +111,27 @@ This implementation is an extension of the original Core War rules from 1984. Th
 
 * X: All addressing modes are valid for all opcodes.
 
+## Redcode quirks
+
+* Always start your redcode file with two (and preferably three) semicolons:
+
+    ;;;
+    ; name:   MYCOOLCODE
+    ; author: rje
+    ; date:   7/7/2021
+
+This is because Commodore files always reserve their first two bytes as a load-address indicator,
+and it's eaten by the operating system long before the file gets loaded.  The third semicolon makes
+the first line a comment, which is safe.
+
+* Separate elements with whitespace:
+
+foo   MOV  #<foo  @bar      ; yes!
+foo:MOV#<foo,@bar           ; NOOOOOOO
+
+* Don't use colons with labels, nor commas with operands.  
+  The code tries to do the right thing with them, but it's a little dodgy.
+
 # VM-specific Behavior
 
 This core implementation is engineered with the following environment:
