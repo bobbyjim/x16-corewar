@@ -1,11 +1,11 @@
 # x16-corewar - a Core War VM
 
-    Two computer programs in their native habitat -- the memory chips of a 
+ Two computer programs in their native habitat -- the memory chips of a 
  digital computer -- stalk each other from address to address. Sometimes they
  go scouting for the enemy; sometimes they lay down a barrage of numeric bombs;
  sometimes they copy themselves out of danger or stop to repair damage. 
  
-    This is the game I call Core War. It is unlike almost all other computer games
+ This is the game I call Core War. It is unlike almost all other computer games
  in that people do not play at all! The contending programs are written by 
  people, of course, but once a battle is under way the creator of a program can
  do nothing but watch helplessly, as the product of hours spent in design and 
@@ -30,6 +30,10 @@ x16emu -prg COREWAR -run
 
 When the program is first run, if you don't press a key for about 20 seconds, a demo will start up.
 Otherwise, the program starts in its shell mode.
+
+## Help
+
+The "help" command provides a command summary for the CLI.
 
 # CORESHELL
 
@@ -79,10 +83,6 @@ copied itself to location 1001, and warrior 1, process 0 is not pointing to loca
 Once you're ready to let it run awhile, just type:
 
     run
-
-## Help
-
-The "help" command provides a command summary for the CLI.
 
 ## Run mode
 
