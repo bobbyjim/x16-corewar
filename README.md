@@ -39,7 +39,7 @@ The "help" command provides a command summary for the CLI.
 
 CORESHELL is the command-line interpreter/debugger. Within it, you can query and reset core data, 
 inject single statements into core data, create new warrior processes at a designated point in the
-core, and load redcode files.  you can step-execute one epoch, or run it all in a graphical "arena"
+core, and load redcode files.  You can step-execute one epoch, or run it all in a graphical "arena"
 for several thousand epochs at a time.
 
 The Coreshell prompt looks like this:
@@ -79,7 +79,7 @@ That means warrior 1, process 0 is now pointing to location 1000.  Now step one 
     step
 
 A memory display will show, and you'll see that the contents of location 1000 has just
-copied itself to location 1001, and warrior 1, process 0 is not pointing to location 1001.
+copied itself to location 1001, and warrior 1, process 0 is now pointing to location 1001.
 Once you're ready to let it run awhile, just type:
 
     run
@@ -95,7 +95,7 @@ completely to set up a fresh run.
 
 ## Compatability Rating X
 
-This implementation is an extension of the original Core War rules from 1984. The references below use the terms 84: (original spec), 86: (ICWS'86), 88: (ICWS'88), 94: (ICWS'94 draft), and X: (variant feature).
+This implementation is an extension of the original Core War rules from the original spec ("84"), the ICWS'86 spec ("86"), ICWS'88 spec ("88"), 1994 draft ("94"), and variant extensions ("X").
 
 ## Opcodes
 
