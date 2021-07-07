@@ -204,7 +204,7 @@ void x16_loadfile(char* name, unsigned char bank, unsigned int location)
 void x16_printCell(Cell *cell, char* postfix)
 {
 #ifdef X16
-    cprintf("%s    %c%-5u  %c%-5u", 
+    cprintf("%s    %c%-5d  %c%-5d", 
         getOpcodeName(cell->opcode), 
         getMode(cell->aMode),
         cell->A,
@@ -215,7 +215,7 @@ void x16_printCell(Cell *cell, char* postfix)
     if (*postfix) 
        cputs(postfix);
 #else
-    printf("%s    %c%-5u  %c%-5u %s", 
+    printf("%s    %c%-5d  %c%-5d %s", 
         getOpcodeName(cell->opcode), 
         getMode(cell->aMode),
         cell->A,
@@ -280,6 +280,9 @@ void x16_arena_draw()
    }
    textcolor(DEFAULT_COLOR);
    */
+   //gotoxy(79,0);
+   //cputc('e');
+   
 
    textcolor(DKGREY);
    for(pos=0; pos<CORESIZE/2; ++pos)
@@ -317,12 +320,13 @@ void x16_arena_touch(int ip, unsigned char owner)
    //
    cputcxy(ARENA_LEFT+x/2, ARENA_TOP+y/2, arena_square[y%2][x%2]); // was: CIRCLE_FILLED
    textcolor(DEFAULT_COLOR);
+   
    /*
-   if ( epoch % 250 == 0)
+   if ( epoch % 256 == 0 )
    {
       cputcxy(79,1, '0' + (epoch*10)/MAXIMUM_EPOCHS);
-      gotoxy(0,0);
-   }*/
+   }
+   */
 #else
     printf("%u @ %u\n\n", owner, ip);
 #endif

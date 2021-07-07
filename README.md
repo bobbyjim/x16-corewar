@@ -1,33 +1,115 @@
 # x16-corewar - a Core War VM
 
-# What is a core war?
+    Two computer programs in their native habitat -- the memory chips of a 
+ digital computer -- stalk each other from address to address. Sometimes they
+ go scouting for the enemy; sometimes they lay down a barrage of numeric bombs;
+ sometimes they copy themselves out of danger or stop to repair damage. 
+ 
+    This is the game I call Core War. It is unlike almost all other computer games
+ in that people do not play at all! The contending programs are written by 
+ people, of course, but once a battle is under way the creator of a program can
+ do nothing but watch helplessly, as the product of hours spent in design and 
+ implementation either lives or dies on the screen. The outcome depends
+ entirely on which program is hit first in a vulnerable area.
 
- ref: https://corewar.co.uk/standards/cwg.txt - 1984
+ - A. K. Dewdney, 1984
 
- ref: https://corewar.co.uk/madtutor.txt - 1986 and 1988
+ 1984 PDF: https://github.com/bobbyjim/x16-corewar/blob/main/doc/Corewar%20Guidelines.pdf
 
-# Compatability Rating X
+ 1984 ref: https://github.com/bobbyjim/x16-corewar/blob/main/doc/corewar%20guidelines%201984.txt
 
-This implementation is an extension of the original Core War rules from 1984. The references below use the terms 84: (original spec), 86: (ICWS'86),
-88: (ICWS'88), 94: (ICWS'94 draft), and X: (variant feature).
+ 1988 ref: https://github.com/bobbyjim/x16-corewar/blob/main/doc/corewar%20guidelines%201986%201988.txt
+
+# Running the program
+
+The binary is "COREWAR".  Load it directly from the X16 prompt, or run it in the emulator with:
+
+x16emu -prg COREWAR -run
+
+## Demo mode
+
+When the program is first run, if you don't press a key for about 20 seconds, a demo will start up.
+Otherwise, the program starts in its shell mode.
+
+# CORESHELL
+
+CORESHELL is the command-line interpreter/debugger. Within it, you can query and reset core data, 
+inject single statements into core data, create new warrior processes at a designated point in the
+core, and load redcode files.  you can step-execute one epoch, or run it all in a graphical "arena"
+for several thousand epochs at a time.
+
+The Coreshell prompt looks like this:
+
+     CORESHELL 8281 (100)  
+
+The "8281" is the remaining free memory in the X16.
+The "100" is the core address the CLI is currently pointing to.
+
+Core memory may be inspected with the "d" command:
+
+     d 1000
+
+The above command displays the contents instructions at core locations 1000 - 1059.
+Executing this command also sets the CLI's instruction pointer to that location, so
+if you next type in some redcode:
+
+     mov 0 1
+
+The instruction will be written into location 1000, and the CLI's instruction pointer
+will be incremented to 1001.
+
+To create a process at that address, go back to location 1000:
+
+    d 1000
+
+Then create warrior #1 there:
+
+    new 1
+
+Coreshell will affirm the entry with:
+
+    ADD-PROCESS(1:0 @1000)
+
+That means warrior 1, process 0 is now pointing to location 1000.  Now step one epoch:
+
+    step
+
+A memory display will show, and you'll see that the contents of location 1000 has just
+copied itself to location 1001, and warrior 1, process 0 is not pointing to location 1001.
+Once you're ready to let it run awhile, just type:
+
+    run
+
+## Help
+
+The "help" command provides a command summary for the CLI.
+
+## Run mode
+
+In run mode, the system runs for several thousand epochs (currently 16,000) before breaking back 
+into the CLI.  After this run, the core may once again be inspected, adjusted, and new programs
+loaded, and the whole thing may be re-run for another session.  The memory may also be cleared
+completely to set up a fresh run.
+
+# VM Details
+
+## Compatability Rating X
+
+This implementation is an extension of the original Core War rules from 1984. The references below use the terms 84: (original spec), 86: (ICWS'86), 88: (ICWS'88), 94: (ICWS'94 draft), and X: (variant feature).
 
 ## Opcodes
 
-* 88: DAT MOV ADD SUB JMP JMZ JMN DJN CMP SPL SLT
+* 88: DAT MOV ADD SUB JMP JMZ JMN DJN CMP SLT SPL
 
-* 94: SEQ
+* 94: SEQ SNE
 
-* X: HCL XCH
+* X: HCL XCH FLP
 
 ### Operands
-
-* 84: Labels are not supported.  
 
 * 84: Operand expressions are not supported.
 
 * X: All addressing modes are valid for all opcodes.
-
-* X: All opcodes MUST have both operands specified.
 
 # VM-specific Behavior
 
