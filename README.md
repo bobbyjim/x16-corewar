@@ -88,8 +88,7 @@ Once you're ready to let it run awhile, just type:
 
 In run mode, the system runs for several thousand epochs (currently 16,000) before breaking back 
 into the CLI.  After this run, the core may once again be inspected, adjusted, and new programs
-loaded, and the whole thing may be re-run for another session.  The memory may also be cleared
-completely to set up a fresh run.
+loaded, and execution may be resumed right where it left off by invoking 'run' again.  The memory may also be cleared completely to set up a fresh run, or even randomized.
 
 # VM Details
 
@@ -126,11 +125,13 @@ the first line a comment, which is safe.
 
 * Separate elements with whitespace:
 
-foo   MOV  #<foo  @bar      ; yes!
-foo:MOV#<foo,@bar           ; NOOOOOOO
+    foo   MOV  #<foo  @bar      ; yes!
+    foo:MOV#<foo,@bar           ; NOOOOOOO
 
 * Don't use colons with labels, nor commas with operands.  
   The code tries to do the right thing with them, but it's a little dodgy.
+
+Otherwise, refer to the URL references for general instructions.
 
 # VM-specific Behavior
 
@@ -139,14 +140,6 @@ This core implementation is engineered with the following environment:
 * Up to 8 warriors may run at a time.
 
 * SPL supports up to 8 processes per warrior.
-
-# Redcode file notes
-
-* START EVERY FILE WITH THREE SEMICOLONS (';;;')!!
-
-The Commander X16 literally throws away the first two bytes of any file it reads in; Therefore, I strongly suggest you begin every redcode file with three semicolons -- by the way, this is a great place to hold the name of the warrior.  I may check for that name in the future.
-
-Otherwise, refer to the URL references for general instructions.
 
 # Arena Architecture
 
@@ -173,9 +166,7 @@ I prefer to set CORE as a prime number, to confound trivial bombing programs a b
 
 ## RAM Banking
 
-The arena is stored RAM banks, starting at bank 10.  If each cell is 5 bytes, then a bank can 
-hold up to 1638 cells.  I put 1500 cells in a bank, and since the arena is currently around 8200 cells, 
-the arena takes up 6 banks.
+The arena is currently stored in RAM banks 10 through 15.
 
 # Opcodes
 
@@ -211,22 +202,14 @@ the arena takes up 6 banks.
 
      SPL A B   ; Add A to the process queue.
     
-Even though there are 16 opcodes, two are aliases, so in reality there are only 14 slots used.  This means there are still two unused opcode slots.  Suggestions welcome.
+FLP compares the system status word, which is an 8-bit register value that increments 
+and wraps based on instructions executed by all programs.  Thus it is a completely
+deterministic value that is nevertheless usable in a pseudo-random context. Generally,
+the more processes that are running, the faster this value "spins".
 
-I really didn't want DJN in the opcode inventory.  I felt it is responsible
-for making Imps too easy.  In the end though there is SO MUCH history around
-this opcode that I decided to leave it in.
-
-SLT and SNE may be useful.  I suspect one of them is useful and the other one not.
-
-FLP is completely silly.  I may remove it.
-
-XCH was desired for at least three decades.
-
-SPL, I think, is another mischief maker opcode.  I've implemented it in a way
-that is kind of abusable: the process runs the next time its owner gets a time 
-slice.  On the other hand, a warrior can only have eight running processes, so
-I think that limitation helps blunt the power of SPL.
+SPL is implemented it in a way that is kind of abusable: the process runs the next 
+time its owner gets a time slice.  On the other hand, a warrior can only have eight 
+running processes, so I think that limitation helps blunt the power of SPL.
 
 ## Modes
 
@@ -268,22 +251,13 @@ The memory cell is a 5 byte C struct, vaguely reminiscent of Lua opcodes:
 
     opcode:     4 bits
     a-mode:     2 bits
-    b-mode:     2 bits
     a operand: 14 bits
+    b-mode:     2 bits
     b operand: 14 bits
-
-The operand size (unsigned 14 bits) limits the memory window size to 16K cells. 
 
 # Build the Commander X16 binary
 
 1. On the command, line, type:
-
-make clean
-
-2. Comment out "#define X16" in common.h
-3. Uncomment "#undef X16" in common.h
-
-4. Then, on the command line:
 
 make
 
@@ -291,37 +265,22 @@ make
 
 1. On the command line, type:
 
-make clean
-
-2. Comment out "#undef X16" in common.h
-3. Uncomment "#define X16" in common.h
-
-4. Then, on the command line:
-
 make -f Makefile.cc
 
 # TO DO
 
-## Larger Arena
+## Shortened Range
 
-At some point I am going to want an 8,000 cell arena.  This will require moving the arena to banked RAM.
+At some point I am going to want to limit programs' reach to only a portion of core memory. 
 Here's how I plan to do it:
 
 (1) Change the cell structure to:
 
-    opcode:     8 bits
-    flags:      8 bits
-    a-mode:     8 bits
-    a operand: 16 bits
-    b-mode:     8 bits
-    b operand: 16 bits
+    opcode:     4 bits
+    a-mode:     2 bits
+    b-mode:     2 bits
+    a operand:  12 bits
+    b operand:  12 bits
 
-I'd move to 8 bytes per cell because CC65 optimizes in powers of two.
+(2) Update the operand routines in the VM to convert them to local offset [-4096, +4095].
 
-(2) Move to banked RAM.
-
-8000 cells x 8 bytes per cell = 1000 cells per bank = 8 banks of RAM.
-
-(3) Move some code into assembly language.
-
-I have no idea what code would move nicely into asm.  But it's on the table.
