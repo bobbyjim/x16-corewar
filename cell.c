@@ -101,13 +101,6 @@ void cell_loadFile(char *filename)
 
     printf("assembling\n");
     assemble();
-    /*
-       if (cell_parseInstruction(buffer) != INVALID_OPCODE)
-       {
-          arena_setLocation(location, &tempCell);
-          location++;
-       }
-    */
     fclose(fp);
 #endif
 }
@@ -245,106 +238,6 @@ unsigned char cell_encode_opcode(char *opcode)
 
     return INVALID_OPCODE;
 }
-
-/*
-unsigned char cell_loadInstruction(int location, char *input)
-{
-   unsigned char result = cell_parseInstruction(input);
-
-   if (result != INVALID_OPCODE)
-      arena_setLocation(location, &tempCell);
-   
-   return result;
-}
-*/
-
-/*
-void cell_decode_operand(char *src, unsigned char *mode, unsigned int *val)
-{
-   int rawValue = 0;
-   switch(*src)
-   {
-       case '#': 
-            *mode = IMMEDIATE;
-            ++src;
-            break;
-
-       case '@': 
-            *mode = INDIRECT;
-            ++src;
-            break;
-
-       case '<':
-            *mode = PREDECREMENT_INDIRECT;
-            ++src;
-            break;
-
-       default:  
-            *mode = DIRECT;
-            break;
-   }
-   sscanf(src, "%d", &rawValue); // allows negative sign
-
-   // convert raw value to core location
-   while (rawValue < 0) rawValue += CORESIZE; // inefficient
-   
-   *val = rawValue; 
-}
-*/
-
-/*
- 
-    Parse the instruction into *tempCell
-
- */
- /*
-unsigned char cell_parseInstruction(char *input)
-{
-    char opcode[3] = "";
-    char a[8] = ""; 
-    char b[8] = "";
-    unsigned char opcode_value;
-    unsigned char argc;
-
-    unsigned char amode = 0;
-    unsigned char bmode = 0;
-    unsigned int aval   = 0;
-    unsigned int bval   = 0;
-
-    input = strtok(input, ";"); // wipe out comments
-
-    argc = sscanf(input, " %3s %s %s", opcode, a, b);
-    opcode_value = cell_encode_opcode(opcode);
-
-    if (opcode_value == INVALID_OPCODE)
-       return INVALID_OPCODE;
-   
-    cell_decode_operand(a, &amode, &aval);
-    cell_decode_operand(b, &bmode, &bval);
-
-    tempCell.opcode  = opcode_value;
-    tempCell.aMode  = amode;
-    tempCell.A      = aval;
-    tempCell.bMode  = bmode;
-    tempCell.B      = bval;
-
-    //
-    //  OK it's a valid opcode.
-    //  Now check for only one operand.
-    //  This is handled elegantly for all cases EXCEPT DAT/HCF.
-    //
-    if (argc == 2 && opcode_value == HCF) 
-    {
-        // for DAT, move A into B
-        tempCell.B     = tempCell.A;
-        tempCell.bMode = tempCell.aMode;
-        tempCell.A     = 0;
-        tempCell.aMode = 0;
-    }
-
-    return opcode_value;
-}
-*/
 
 char* getOpcodeName(unsigned char code)
 {

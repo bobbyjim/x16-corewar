@@ -23,6 +23,8 @@ Best to include it on the compile command with -DX16.
  */
 #define     CORESIZE                16000
 #define     INVALID_LOCATION        30000
+#define     OPERAND_SIZE            4096
+#define     OPERAND_HALF_SIZE       2048
 
 #define     MAX_WARRIOR_LINES       256
 #define     LINE_BUFFER_SIZE        80

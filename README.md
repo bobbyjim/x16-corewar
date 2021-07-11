@@ -279,8 +279,9 @@ Here's how I plan to do it:
     opcode:     4 bits
     a-mode:     2 bits
     b-mode:     2 bits
-    a operand:  12 bits
-    b operand:  12 bits
+    a operand:  int
+    b operand:  int
 
-(2) Update the operand routines in the VM to convert them to local offset [-4096, +4095].
+(2) Update the assembler to correctly assign values into the operands.
 
+(3) Update the operand routines in the VM to convert them to local offset [-2048, +2047].

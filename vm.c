@@ -6,10 +6,7 @@
 #include "process.h"
 #include "x16.h"
 
-//extern Cell arena[CORESIZE];
 extern unsigned char corewar_system_status;
-
-//#define     INST        arena[ip]
 extern unsigned char currentBank; // from bank.c
 
 Cell           *inst_ptr;
@@ -31,6 +28,24 @@ unsigned char   tempOperand;
 extern unsigned char owner;
 extern unsigned char pid;
 extern int address;
+
+/*
+ *    RESTRICTED RANGES
+ *
+ *    If we restrict the operands to 12 bits, then they represent values from
+ *    0 to 4095.  Converting A- and B- values from these unsigned 12 bit numbers
+ *    to their signed variants can be as easy as:
+ *
+ *    Aprime = [A - 2048]
+ *
+ *    This means that 0 through 2047 are actually negative numbers, and so when
+ *    we see a negative number in the source file, we have to remember to add
+ *    2048 to it before storing it in the core.
+ *
+ *    Maybe a more "rational" method, though, is to treat the high bit as a sign
+ *    bit.  But that might be more computationally annoying!
+ *    
+ */
 
 void getOperandAData()
 {

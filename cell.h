@@ -3,12 +3,6 @@
 
 typedef struct {
 	unsigned char opcode: 4;
-/*
-	unsigned char flag1 : 1;
-	unsigned char flag2 : 1;
-	unsigned char flag3 : 1;
-	unsigned char flag4 : 1;
-*/
 	unsigned char aMode : 2;
 	unsigned int A  	: 14; 
 	unsigned char bMode : 2;
@@ -135,11 +129,8 @@ void cell_resetProgram();
 void cell_storeInProgram();
 void cell_copyProgramIntoCore();
 
-
 void loadProgram(char *buffer[], unsigned char bufsiz, int startLocation);
 unsigned char cell_encode_opcode(char *opcode);
-//unsigned char cell_parseInstruction(char *input);
-//unsigned char cell_loadInstruction(int location, char* input);
 char* getOpcodeName(unsigned char code);
 char  getMode(unsigned char mode);
 
