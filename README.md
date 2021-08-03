@@ -114,10 +114,10 @@ This implementation is an extension of the original Core War rules from the orig
 
 * Always start your redcode file with two (and preferably three) semicolons:
 
-    ;;;
-    ; name:   MYCOOLCODE
-    ; author: rje
-    ; date:   7/7/2021
+      ;;;
+      ; name:   MYCOOLCODE
+      ; author: rje
+      ; date:   7/7/2021
 
 This is because Commodore files always reserve their first two bytes as a load-address indicator,
 and it's eaten by the operating system long before the file gets loaded.  The third semicolon makes
@@ -125,8 +125,8 @@ the first line a comment, which is safe.
 
 * Separate elements with whitespace:
 
-    foo   MOV  #<foo  @bar      ; yes!
-    foo:MOV#<foo,@bar           ; NOOOOOOO
+      foo   MOV  #<foo  @bar      ; yes!
+      foo:MOV#<foo,@bar           ; NOOOOOOO
 
 * Don't use colons with labels, nor commas with operands.  
   The code tries to do the right thing with them, but it's a little dodgy.
@@ -188,9 +188,9 @@ The arena is currently stored in RAM banks 10 through 15.
         
      FLP A B   ; Jump to location A if system word < B.
 
-     CMP A B   ; Skip next instruction if A == B.
+     CMP A B   ; Same as SEQ.
 
-     SEQ A B   ; Same as CMP.
+     SEQ A B   ; Skip next instruction if A == B.
 
      SLT A B   ; Skip next instruction if A < B.
 
@@ -221,18 +221,11 @@ The number following this symbol is the operand.
 
 ### Relative (no sigil)
 
-The  number  specifies  an  offset from the current instruction. Mars
-adds the  offset to the address of the current  instruction; the num-
-ber stored at the location reached in this way is the operand.
+The  number  specifies  an  offset from the current instruction. Mars adds the  offset to the address of the current  instruction; the number stored at the location reached in this way is the operand.
 
 ### Indirect '@'
 
-The number  following  this symbol specifies an  offset from the cur-
-rent  instruction  to  a  location where the  relative address of the
-operand is  found.  Mars  adds the offset to  the address of the cur-
-rent instruction and retrieves the number stored at the specified lo-
-cation; this number is then interpreted as  an offset  from its own
-address. The number found  at this second location is the operand.
+The number  following  this symbol specifies an  offset from the current  instruction  to  a  location where the  relative address of the operand is  found.  Mars  adds the offset to  the address of the current instruction and retrieves the number stored at the specified location; this number is then interpreted as  an offset  from its own address. The number found  at this second location is the operand.
 
 ### Indirect Predecrement '<'
 
@@ -261,11 +254,16 @@ The memory cell is a 5 byte C struct, vaguely reminiscent of Lua opcodes:
 
 make
 
+This will build the X16 executable file using CC65.
+(NOTE: you have to have CC65 installed!)
+
 # Build the "CC" binary 
 
 1. On the command line, type:
 
 make -f Makefile.cc
+
+This will build a locally-executable file using whatever CC is linked to.  This is very useful for testing.
 
 # TO DO
 
