@@ -1,4 +1,4 @@
-; Warrior PLAGUE
+;;; Warrior PLAGUE
 
    SPL k
    SPL k

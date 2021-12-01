@@ -1,4 +1,4 @@
-; Warrior KISS
+;;; Warrior KISS
 
 l:  MOV b1 <p
     MOV b2 <p
