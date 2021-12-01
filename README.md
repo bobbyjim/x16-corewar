@@ -60,6 +60,8 @@ The Coreshell prompt looks like this:
 The "8281" is the remaining free memory in the X16.
 The "100" is the core address the CLI is currently pointing to.
 
+Type "HELP" to see the list of commands.
+
 Core memory may be inspected with the "d" command:
 
      d 1000
