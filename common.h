@@ -10,17 +10,6 @@ Best to include it on the compile command with -DX16.
 //#define        X16
 //#undef         X16   
 
-/*
-    Thoughts on some core sizes.
-
-    78 cols x 52 rows = 4056.
-    4093 is prime.
-
-    In order to have 8000 locations:
-    * to get CC65 optimization, we'd expand the cell structure to _EIGHT_ bytes.
-    * we'd move the arena into 8 RAM banks, 1000 locations per bank.
-
- */
 #define     CORESIZE                16000
 #define     INVALID_LOCATION        30000
 #define     OPERAND_SIZE            4096

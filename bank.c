@@ -29,7 +29,9 @@ void setBank(unsigned char bank)
 
 void setCoreBank(int position)
 {
-    unsigned char bank = 10 + (position / CELLS_PER_BANK);
+    // ASSUME: CELLS_PER_BANK is 1024.  This lets us shift
+    // instead of divide.
+    unsigned char bank = 10 + (position >> 10); //  (position / CELLS_PER_BANK);
 
     if (bank == currentBank) return;
 

@@ -216,7 +216,7 @@ int vm_execute() // unsigned char owner, unsigned char pid, int address)
             break;
 
         case DEC:
-        case INC:  // TO DO
+        case INC:  // TO DO, OR NOT
            break;  
 
         //
